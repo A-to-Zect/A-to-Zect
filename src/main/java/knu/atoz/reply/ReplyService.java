@@ -1,0 +1,102 @@
+package knu.atoz.reply;
+
+import knu.atoz.post.exception.InvalidPostException;
+import knu.atoz.reply.dto.ReplyRequestDto;
+import knu.atoz.reply.dto.ReplyResponseDto;
+import knu.atoz.reply.exception.InvalidReplyException;
+import knu.atoz.reply.exception.ReplyNotFoundException;
+import knu.atoz.reply.exception.ReplyNotInPostException;
+import knu.atoz.reply.exception.UnauthorizedReplyAccessException;
+
+import java.util.List;
+
+public class ReplyService {
+
+    private final ReplyRepository replyRepository;
+    public ReplyService(ReplyRepository replyRepository) {
+        this.replyRepository = replyRepository;
+    }
+
+    public List<ReplyResponseDto> getReplyList(Long postId){
+        if (postId == null){
+            throw new InvalidReplyException("게시물 ID가 필요합니다.");
+        }
+        return replyRepository.findAllByPostId(postId);
+    }
+
+    public List<Reply> getMyReplyList(Long postId, Long memberId){
+        if (postId == null){
+            throw new InvalidReplyException("게시물 ID가 필요합니다.");
+        }
+        if (memberId == null){
+            throw new InvalidReplyException("회원 ID가 필요합니다.");
+        }
+        return replyRepository.findMyReplyByPostIdAndMemberId(postId, memberId);
+    }
+
+    public Reply getReply(Long replyId){
+        Reply reply = replyRepository.findById(replyId);
+        if (reply == null){
+            throw new ReplyNotFoundException();
+        }
+
+        return reply;
+    }
+
+    public void createReply(Long postId, Long memberId, ReplyRequestDto requestDto){
+        if (postId == null){
+            throw new InvalidReplyException("게시물 ID가 필요합니다.");
+        }
+        if (memberId == null){
+            throw new InvalidReplyException("회원 ID가 필요합니다.");
+        }
+        if (requestDto.getContent() == null || requestDto.getContent().trim().isEmpty()) {
+            throw new InvalidPostException("댓글 내용은 필수입니다.");
+        }
+
+        Reply reply = new Reply(postId, memberId, requestDto.getContent());
+
+        replyRepository.save(reply);
+    }
+
+    public void updateReply(Long postId, Long replyId, Long memberId, ReplyRequestDto requestDto){
+        Reply original =  replyRepository.findById(replyId);
+        if (original == null){
+            throw new ReplyNotFoundException();
+        }
+
+        if (!original.getPostId().equals(postId)){
+            throw new ReplyNotInPostException();
+        }
+
+        if (!original.getMemberId().equals(memberId)){
+            throw new UnauthorizedReplyAccessException();
+        }
+
+        if (requestDto.getContent() == null || requestDto.getContent().trim().isEmpty()) {
+            throw new InvalidPostException("댓글 내용은 필수입니다.");
+        }
+
+        Reply reply = new Reply(
+                original.getId(),
+                original.getPostId(),
+                original.getMemberId(),
+                requestDto.getContent(),
+                original.getCreatedAt()
+        );
+
+        replyRepository.update(reply);
+    }
+
+    public void deleteReply(Long replyId, Long memberId){
+        Reply original =  replyRepository.findById(replyId);
+        if (original == null){
+            throw new ReplyNotFoundException();
+        }
+
+        if (!original.getMemberId().equals(memberId)){
+            throw new UnauthorizedReplyAccessException();
+        }
+        replyRepository.delete(replyId);
+    }
+}

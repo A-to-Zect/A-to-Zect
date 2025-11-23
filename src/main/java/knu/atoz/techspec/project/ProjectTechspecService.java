@@ -1,0 +1,94 @@
+package knu.atoz.techspec.project;
+
+import knu.atoz.project.Project;
+import knu.atoz.techspec.Techspec;
+import knu.atoz.techspec.TechspecRepository;
+import knu.atoz.techspec.exception.TechspecAlreadyExistsException;
+import knu.atoz.techspec.exception.TechspecInvalidException;
+import knu.atoz.techspec.exception.TechspecNotFoundException;
+import knu.atoz.utils.Azconnection;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+
+public class ProjectTechspecService {
+
+    private final TechspecRepository techspecRepository;
+    private final ProjectTechspecRepository projectTechspecRepository;
+    public  ProjectTechspecService(TechspecRepository techspecRepository,  ProjectTechspecRepository projectTechspecRepository) {
+        this.techspecRepository = techspecRepository;
+        this.projectTechspecRepository = projectTechspecRepository;
+    }
+
+    public List<Techspec> getProjectTechspecs(Project currentProject) {
+        return projectTechspecRepository.findTechspecsByProjectId(currentProject.getId());
+    }
+
+    public void addTechspecToProject(Project currentProject, String techName) {
+
+        if (techName == null || techName.isBlank()) {
+            throw new TechspecInvalidException("스택 이름은 비어 있을 수 없습니다.");
+        }
+
+        Connection conn = null;
+        try {
+            conn = Azconnection.getConnection();
+            conn.setAutoCommit(false);
+
+            Techspec techspec = techspecRepository.findTechspecIdByName(techName);
+            Long techspecId = null;
+            if (techspec == null) {
+                techspecId = techspecRepository.createTechspec(conn, techName);
+            }
+            else {
+                techspecId = techspec.getId();
+            }
+
+            boolean inserted = projectTechspecRepository.addProjectTechspec(
+                    conn, currentProject.getId(), techspecId
+            );
+
+            if (!inserted) {
+                throw new RuntimeException("스택 추가 실패");
+            }
+
+            conn.commit();
+
+        } catch (SQLException e) {
+
+            rollbackQuietly(conn);
+
+            if (e.getErrorCode() == 1) {
+                throw new TechspecAlreadyExistsException(
+                        "이미 존재하는 스택입니다."
+                );
+            }
+
+            throw new RuntimeException("DB 오류 발생: " + e.getMessage());
+
+        } finally {
+            closeQuietly(conn);
+        }
+    }
+
+    public void removeTechspecFromProject(Project currentProject, Long techspecId) {
+
+        if (!projectTechspecRepository.deleteProjectTechspec(currentProject.getId(), techspecId)) {
+            throw new TechspecNotFoundException("삭제할 스택이 존재하지 않습니다.");
+        }
+    }
+
+    private void rollbackQuietly(Connection conn) {
+        try { if (conn != null) conn.rollback(); } catch (SQLException ignored) {}
+    }
+
+    private void closeQuietly(Connection conn) {
+        try {
+            if (conn != null) {
+                conn.setAutoCommit(true);
+                conn.close();
+            }
+        } catch (SQLException ignored) {}
+    }
+}
