@@ -17,9 +17,12 @@
     </div>
 
     <form th:action="${actionUrl}"
-          th:object="${documentRequestDto}" method="post">
+          th:object="${documentRequestDto}"
+          method="post"
+          enctype="application/x-www-form-urlencoded">
 
         <input th:if="${!isNew}" type="hidden" name="_method" value="put"/>
+
 
         <div class="mb-3">
             <label for="title" class="form-label">문서 제목</label>
