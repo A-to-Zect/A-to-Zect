@@ -113,28 +113,52 @@
     </div>
 
     <div class="info-card">
-        <h3 style="margin-top: 0; border-left: none; padding-left: 0;">🧠 MBTI & Tech Stack</h3>
-        <div style="margin-bottom: 20px;">
-            <div style="font-size: 13px; color: #888; margin-bottom: 5px;">나의 MBTI</div>
-            <span th:if="${info.mbti != null}" class="mbti-badge" th:text="${info.mbti}">ENTP</span>
-            <span th:if="${info.mbti == null}" style="color: #999;">등록된 MBTI가 없습니다.</span>
-            <a href="/members/mbti" class="btn btn-outline" style="font-size: 12px; padding: 5px 10px;">수정</a>
-        </div>
+        <h3 style="margin-top: 0; border-left: none; padding-left: 0; margin-bottom: 20px;">
+            🧠 MBTI & Tech Stack
+        </h3>
 
-        <div>
-            <div style="font-size: 13px; color: #888; margin-bottom: 5px;">보유 기술 스택</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px dashed #eee; margin-bottom: 15px;">
 
-            <div th:if="${info.techspecs == null || info.techspecs.isEmpty()}" style="color: #999;">
-                등록된 기술 스택이 없습니다.
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <span style="font-size: 14px; font-weight: bold; color: #555; width: 80px;">나의 MBTI</span>
+
+                <div th:if="${info.mbti != null}">
+                    <span class="mbti-badge" th:text="${info.mbti}" style="font-size: 16px; padding: 5px 12px;">ENTP</span>
+                </div>
+                <div th:if="${info.mbti == null}" style="color: #ccc; font-size: 14px;">
+                    미설정
+                </div>
             </div>
 
-            <div th:if="${info.techspecs != null}">
-                <span th:each="tech : ${#strings.arraySplit(info.techspecs, ',')}"
-                      class="badge"
-                      style="font-size: 14px; padding: 6px 10px;"
-                      th:text="${#strings.trim(tech)}">Java</span>
-            </div>
+            <a href="/members/mbti" class="btn btn-outline" style="font-size: 12px; padding: 4px 12px; flex-shrink: 0;">
+                수정
+            </a>
         </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+
+            <div style="display: flex; align-items: center; gap: 20px; flex-grow: 1; margin-right: 15px;">
+                <span style="font-size: 14px; font-weight: bold; color: #555; width: 80px; flex-shrink: 0;">기술 스택</span>
+
+                <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                    <div th:if="${info.techspecs == null || info.techspecs.isEmpty()}" style="color: #ccc; font-size: 14px;">
+                        등록된 스택 없음
+                    </div>
+
+                    <th:block th:if="${info.techspecs != null}">
+                    <span th:each="tech : ${#strings.arraySplit(info.techspecs, ',')}"
+                          class="badge"
+                          style="font-size: 13px; padding: 5px 10px; background-color: #f1f3f5; color: #495057;"
+                          th:text="${#strings.trim(tech)}">Java</span>
+                    </th:block>
+                </div>
+            </div>
+
+            <a href="/members/techspecs" class="btn btn-outline" style="font-size: 12px; padding: 4px 12px; flex-shrink: 0;">
+                관리
+            </a>
+        </div>
+
     </div>
 
     <div class="info-card">

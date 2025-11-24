@@ -1,69 +1,64 @@
 package knu.atoz.techspec.member;
 
-import knu.atoz.member.Member;
 import knu.atoz.techspec.Techspec;
 import knu.atoz.techspec.TechspecRepository;
-import knu.atoz.techspec.dto.TechspecAddRequestDto;
-import knu.atoz.techspec.exception.TechspecAlreadyExistsException;
-import knu.atoz.techspec.exception.TechspecInvalidException;
-import knu.atoz.techspec.exception.TechspecNotFoundException;
+import knu.atoz.techspec.exception.*;
 import knu.atoz.utils.Azconnection;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
+@Service
+@RequiredArgsConstructor
 public class MemberTechspecService {
 
     private final TechspecRepository techspecRepository;
     private final MemberTechspecRepository memberTechspecRepository;
-    public MemberTechspecService(TechspecRepository techspecRepository,  MemberTechspecRepository memberTechspecRepository) {
-        this.techspecRepository = techspecRepository;
-        this.memberTechspecRepository = memberTechspecRepository;
+
+    // [변경] Member 객체 대신 ID 사용
+    public List<Techspec> getMyTechspecs(Long memberId) {
+        return memberTechspecRepository.findTechspecsByMemberId(memberId);
     }
 
-    public List<Techspec> getMyTechspecs(Member currentUser) {
-        return memberTechspecRepository.findTechspecsByMemberId(currentUser.getId());
-    }
+    // [변경] Member 객체 대신 ID 사용, DTO 대신 String 직접 받기 (단일 필드라 더 편함)
+    public void addTechspec(Long memberId, String techName) {
 
-    public void addTechspec(Member currentUser, TechspecAddRequestDto techspecAddRequestDto) {
-
-        if (techspecAddRequestDto.getName() == null || techspecAddRequestDto.getName().isBlank()) {
+        if (techName == null || techName.isBlank()) {
             throw new TechspecInvalidException("스택 이름은 비어 있을 수 없습니다.");
         }
 
         Connection conn = null;
-
         try {
             conn = Azconnection.getConnection();
-            conn.setAutoCommit(false);
+            conn.setAutoCommit(false); // 트랜잭션 시작
 
-            Techspec techspec = techspecRepository.findTechspecIdByName(techspecAddRequestDto.getName());
-            Long techspecId = null;
-            // 스택이 없으면 생성
+            // 1. 기술 스택 존재 확인 및 생성
+            Techspec techspec = techspecRepository.findTechspecIdByName(techName);
+            Long techspecId;
+
             if (techspec == null) {
-                techspecId = techspecRepository.createTechspec(conn, techspecAddRequestDto.getName());
-            }
-            else {
+                techspecId = techspecRepository.createTechspec(conn, techName);
+            } else {
                 techspecId = techspec.getId();
             }
 
-            if (memberTechspecRepository.addMemberTechspec(conn, currentUser.getId(), techspecId) == null) {
-                throw new RuntimeException("스택 추가 실패");
+            // 2. 멤버-기술스택 연결
+            // (Repository 메서드가 Long id를 반환한다고 가정)
+            if (memberTechspecRepository.addMemberTechspec(conn, memberId, techspecId) == null) {
+                throw new TechspecAlreadyExistsException("이미 추가된 스택입니다.");
             }
 
             conn.commit();
 
         } catch (SQLException e) {
-
             rollbackQuietly(conn);
-
+            // 오라클 PK/Unique 제약조건 위반 (에러코드 1)
             if (e.getErrorCode() == 1) {
-                throw new TechspecAlreadyExistsException(
-                        "이미 존재하는 스택입니다."
-                );
+                throw new TechspecAlreadyExistsException("이미 존재하는 스택입니다.");
             }
-
             throw new RuntimeException("DB 오류: " + e.getMessage());
 
         } finally {
@@ -71,22 +66,19 @@ public class MemberTechspecService {
         }
     }
 
-    public void removeTechspec(Member currentUser, Long techspecId) {
-
+    // [변경] Member 객체 대신 ID 사용
+    public void removeTechspec(Long memberId, Long techspecId) {
         if (techspecId == null || techspecId <= 0) {
             throw new TechspecInvalidException("유효하지 않은 스택 ID입니다.");
         }
 
-        if (!memberTechspecRepository.deleteMemberTechspec(currentUser.getId(), techspecId)) {
+        if (!memberTechspecRepository.deleteMemberTechspec(memberId, techspecId)) {
             throw new TechspecNotFoundException("삭제할 스택이 존재하지 않습니다.");
         }
     }
 
-
     private void rollbackQuietly(Connection conn) {
-        try {
-            if (conn != null) conn.rollback();
-        } catch (SQLException ignored) {}
+        try { if (conn != null) conn.rollback(); } catch (SQLException ignored) {}
     }
 
     private void closeQuietly(Connection conn) {
