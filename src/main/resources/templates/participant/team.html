@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>팀원 목록</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .member-card {
+            background: white; border: 1px solid #eee; border-radius: 10px; padding: 15px; margin-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .role-badge { font-size: 11px; font-weight: bold; padding: 3px 6px; border-radius: 4px; margin-left: 5px; }
+        .badge-leader { background: #fff0f6; color: #d6336c; }
+        .badge-member { background: #f1f3f5; color: #495057; }
+    </style>
+</head>
+<body>
+<div class="container" style="max-width: 600px;">
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1>👥 팀원 목록</h1>
+        <a th:href="@{/projects/{id}(id=${project.id})}" class="btn btn-outline">← 돌아가기</a>
+    </div>
+
+    <p class="subtitle">
+        <strong th:text="${project.title}">프로젝트</strong>의 팀원 (<span th:text="${members.size()}"></span>명)
+    </p>
+    <hr>
+
+    <div th:if="${param.error}" class="error-msg" th:text="${param.error}"></div>
+
+    <div th:each="mem : ${members}" class="member-card">
+        <div>
+            <strong th:text="${mem.name}">이름</strong>
+            <span th:if="${mem.role == 'LEADER'}" class="role-badge badge-leader">LEADER</span>
+            <span th:if="${mem.role == 'MEMBER'}" class="role-badge badge-member">MEMBER</span>
+            <div style="font-size: 13px; color: #888;" th:text="${mem.email}">email</div>
+        </div>
+
+        <div th:if="${myRole == 'LEADER' and mem.role != 'LEADER'}">
+            <form th:action="@{|/projects/${project.id}/participants/${mem.memberId}/kick|}" method="post">
+                <button type="submit" class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;"
+                        onclick="return confirm('정말 추방하시겠습니까?');">
+                    추방
+                </button>
+            </form>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

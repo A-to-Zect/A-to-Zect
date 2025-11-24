@@ -159,8 +159,8 @@
         <h3 class="section-title" style="margin-bottom: 25px;">🚀 프로젝트 참여</h3>
 
         <div th:if="${myRole == 'LEADER'}">
-            <a th:href="@{/projects/{id}/manage(id=${project.id})}" class="btn btn-primary btn-block" style="padding: 15px; font-size: 16px;">
-                👥 신청자 관리 (리더 전용)
+            <a th:href="@{/projects/{id}/participants/applicants(id=${project.id})}" class="btn btn-primary btn-block" style="padding: 15px; font-size: 16px;">
+                👥 신청자 관리
             </a>
         </div>
 
@@ -194,10 +194,15 @@
     </div>
 
     <div class="detail-section" style="background: #fbfbfc; border-color: #e9ecef;">
-        <h3 class="section-title" style="border-left-color: #28a745;">4. 프로젝트 활동</h3>
+        <h3 class="section-title" style="border-left-color: #28a745;">프로젝트 활동</h3>
 
         <div class="menu-grid" style="margin-top: 25px;"
              th:styleappend="${myRole != 'LEADER' and myRole != 'MEMBER'} ? 'opacity: 0.5; pointer-events: none;' : ''">
+            <a th:href="@{/projects/{id}/participants(id=${project.id})}"
+               class="btn btn-outline btn-block"
+               style="color: #555; background: white; padding: 20px; font-size: 15px; display: block; text-decoration: none;">
+                👥 함께하는 팀원
+            </a>
             <button class="btn btn-outline btn-block" style="color: #555; background: white; padding: 20px; font-size: 15px;">
                 📋 게시판
             </button>

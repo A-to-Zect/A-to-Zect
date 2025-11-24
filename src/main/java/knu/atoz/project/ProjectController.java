@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpSession;
 import knu.atoz.mbti.project.ProjectMbtiService;
 import knu.atoz.member.Member;
 import knu.atoz.participant.ParticipantService;
-import knu.atoz.participant.exception.ParticipantException;
 import knu.atoz.project.dto.MyProjectResponseDto;
 import knu.atoz.project.dto.ProjectCreateRequestDto;
 import knu.atoz.project.dto.ProjectUpdateRequestDto;
@@ -77,25 +76,6 @@ public class ProjectController {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("projectDto", dto); 
             return "project/create";
-        }
-    }
-
-    
-    @PostMapping("/{projectId}/join")
-    public String joinProject(@PathVariable Long projectId,
-                              HttpSession session,
-                              Model model) {
-        Member loginMember = (Member) session.getAttribute("loginMember");
-        if (loginMember == null) {
-            return "redirect:/members/login";
-        }
-
-        try {
-            participantService.joinProject(projectId, loginMember.getId());
-            return "redirect:/projects/my"; 
-        } catch (ParticipantException | ProjectException e) {
-            
-            return "redirect:/projects?error=" + e.getMessage();
         }
     }
 
@@ -223,59 +203,6 @@ public class ProjectController {
             return "redirect:/projects/" + projectId;
         } catch (Exception e) {
             return "redirect:/projects/" + projectId + "?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
-        }
-    }
-
-    
-    @GetMapping("/{projectId}/manage")
-    public String manageParticipants(@PathVariable Long projectId, HttpSession session, Model model) {
-        Member loginMember = (Member) session.getAttribute("loginMember");
-        if (loginMember == null) return "redirect:/members/login";
-
-        try {
-            
-            String myRole = participantService.getMyRole(projectId, loginMember.getId());
-            if (!"LEADER".equals(myRole)) {
-                throw new RuntimeException("관리자 권한이 없습니다.");
-            }
-
-            
-            Project project = projectService.getProject(projectId);
-            List<Member> pendingMembers = participantService.getPendingMembers(projectId);
-
-            model.addAttribute("project", project);
-            model.addAttribute("pendingList", pendingMembers);
-
-            return "participant/manage";
-
-        } catch (Exception e) {
-            return "redirect:/projects/" + projectId + "?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
-        }
-    }
-
-    
-    @PostMapping("/{projectId}/accept/{targetMemberId}")
-    public String acceptMember(@PathVariable Long projectId,
-                               @PathVariable Long targetMemberId,
-                               HttpSession session) {
-        
-        try {
-            participantService.acceptMember(projectId, targetMemberId);
-            return "redirect:/projects/" + projectId + "/manage";
-        } catch (Exception e) {
-            return "redirect:/projects/" + projectId + "/manage?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
-        }
-    }
-
-    
-    @PostMapping("/{projectId}/reject/{targetMemberId}")
-    public String rejectMember(@PathVariable Long projectId,
-                               @PathVariable Long targetMemberId) {
-        try {
-            participantService.rejectMember(projectId, targetMemberId);
-            return "redirect:/projects/" + projectId + "/manage";
-        } catch (Exception e) {
-            return "redirect:/projects/" + projectId + "/manage?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
     }
 }

@@ -313,9 +313,16 @@ public class ProjectRepository {
         }
     }
 
-    
     public void incrementCurrentCount(Connection conn, Long projectId) throws SQLException {
         String sql = "UPDATE Project SET current_count = current_count + 1 WHERE id = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setLong(1, projectId);
+            pstmt.executeUpdate();
+        }
+    }
+
+    public void decrementCurrentCount(Connection conn, Long projectId) throws SQLException {
+        String sql = "UPDATE project SET current_count = current_count - 1 WHERE id = ? AND current_count > 0";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setLong(1, projectId);
             pstmt.executeUpdate();

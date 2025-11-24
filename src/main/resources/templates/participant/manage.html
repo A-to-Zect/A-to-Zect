@@ -41,11 +41,11 @@
 
     <div th:if="${param.error}" class="error-msg" th:text="${param.error}"></div>
 
-    <div th:if="${pendingList == null || pendingList.isEmpty()}" class="empty-message" style="padding: 50px;">
+    <div th:if="${applicants == null || applicants.isEmpty()}" class="empty-message" style="padding: 50px;">
         현재 대기 중인 신청자가 없습니다.
     </div>
 
-    <div th:each="member : ${pendingList}" class="applicant-card">
+    <div th:each="member : ${applicants}" class="applicant-card">
 
         <div class="applicant-info">
             <span class="applicant-name" th:text="${member.name}">홍길동</span>
@@ -53,14 +53,14 @@
         </div>
 
         <div class="action-buttons">
-            <form th:action="@{|/projects/${project.id}/accept/${member.id}|}" method="post">
+            <form th:action="@{|/projects/${project.id}/participants/${member.id}/accept|}" method="post">
                 <button type="submit" class="btn btn-primary" style="padding: 8px 15px; font-size: 13px;"
                         onclick="return confirm('이 회원을 팀원으로 수락하시겠습니까?');">
                     수락
                 </button>
             </form>
 
-            <form th:action="@{|/projects/${project.id}/reject/${member.id}|}" method="post">
+            <form th:action="@{|/projects/${project.id}/participants/${member.id}/reject|}" method="post">
                 <button type="submit" class="btn btn-danger" style="padding: 8px 15px; font-size: 13px;"
                         onclick="return confirm('정말 거절하시겠습니까?');">
                     거절
