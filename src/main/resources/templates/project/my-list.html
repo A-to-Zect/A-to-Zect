@@ -59,6 +59,7 @@
         }
         .badge-leader { background: #fff0f6; color: #d6336c; border: 1px solid #ffdeeb; } /* 분홍색 */
         .badge-member { background: #f1f3f5; color: #495057; border: 1px solid #e9ecef; } /* 회색 */
+        .badge-pending {background: #e6fcf5; color: #0ca678; border: 1px solid #c3fae8;}
 
         /* 제목 및 설명 */
         .card-title {
@@ -141,6 +142,7 @@
 
             <span th:if="${project.role == 'LEADER'}" class="role-badge badge-leader">LEADER</span>
             <span th:if="${project.role == 'MEMBER'}" class="role-badge badge-member">MEMBER</span>
+            <span th:if="${project.role == 'PENDING'}" class="role-badge badge-pending">PENDING</span>
 
             <div class="card-title" th:text="${project.title}">프로젝트 제목</div>
             <div class="card-desc" th:text="${#strings.abbreviate(project.description, 60)}">설명</div>
