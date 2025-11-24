@@ -1,31 +1,48 @@
 /* src/main/resources/static/css/list.css */
 
+/* --- 기본 레이아웃 --- */
 body {
     background-color: #f8f9fa;
     min-height: 100vh;
-    font-family: Arial, sans-serif; /* 글꼴 지정 (선택 사항) */
+    font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
 }
 
 .main-container {
-    padding-top: 30px; /* 상단 여백 추가 */
+    padding-top: 30px;
 }
 
+/* --- 상단 제목 및 뒤로가기 스타일 --- */
 .list-header {
     margin-top: 0;
     margin-bottom: 30px;
     padding-bottom: 10px;
     border-bottom: 2px solid #e9ecef;
-    font-weight: 700;
 }
 
-/* 문서 항목을 카드 형태로 변환 */
+/* 💡 추가된 부분: list-header 내 h3 (또는 h2)에 대해 굵기 강제 적용 */
+.list-header h3, .list-header h2 {
+    font-weight: 900 !important; /* 가장 굵게 (Extra Bold) 강제 적용 */
+    font-size: 1.5rem; /* 사이즈 조정 */
+    color: #343a40;
+}
+
+/* 뒤로가기 버튼: 텍스트 링크 스타일 */
+.btn-link {
+    font-weight: 600;
+    padding: 0;
+}
+.btn-link:hover {
+    text-decoration: underline;
+}
+
+/* --- 문서 카드 스타일 --- */
 .document-card {
     background-color: #ffffff;
-    border: 1px solid #dee2e6; /* 은은한 경계선 추가 */
+    border: 1px solid #dee2e6;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    margin-bottom: 15px;
-    padding: 20px;
+    margin-bottom: 12px;
+    padding: 15px 20px;
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
@@ -34,30 +51,50 @@ body {
     transform: translateY(-2px);
 }
 
+/* 텍스트 스타일 */
 .document-title {
-    font-size: 1.1rem; /* 제목 크기 약간 줄임 */
-    font-weight: 600;
-    color: #343a40;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #495057;
 }
 
+.text-muted-location {
+    font-size: 0.85rem;
+    color: #868e96 !important;
+}
+
+/* --- 액션 버튼 그룹 --- */
 .document-actions {
-    min-width: 150px;
+    min-width: 140px;
+    padding-left: 10px;
     display: flex;
+    justify-content: flex-end;
     gap: 8px;
     align-items: center;
 }
 
-.action-button-group {
-    display: flex;
-    gap: 5px;
-}
-/* 수정 버튼 색상을 Primary (파란색) 계열로 변경 */
+/* --- 수정 버튼 (테두리 파란색) --- */
 .btn-action-edit {
-    background-color: #007bff;
-    border-color: #007bff;
-    color: white; /* 텍스트 색상 흰색 */
+    color: #007bff;
+    background-color: transparent;
+    border: 1px solid #007bff;
+    font-weight: 600;
 }
 .btn-action-edit:hover {
-    background-color: #0056b3;
-    border-color: #0056b3;
+    color: #ffffff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+/* --- 삭제 버튼 (테두리 보라색) --- */
+.btn-action-delete {
+    color: #6f42c1;
+    background-color: transparent;
+    border: 1px solid #6f42c1;
+    font-weight: 600;
+}
+.btn-action-delete:hover {
+    color: #ffffff;
+    background-color: #6f42c1;
+    border-color: #6f42c1;
 }
