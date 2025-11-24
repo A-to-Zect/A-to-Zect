@@ -170,15 +170,17 @@ public class ProjectRepository {
     }
 
     public Project save(Connection conn, Project project) throws SQLException {
-        String sql = "INSERT INTO project (title, description, created_at, updated_at) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO project (title, description, current_count, max_count, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)";
         String[] generatedColumns = {"id"};
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql, generatedColumns)) {
 
             pstmt.setString(1, project.getTitle());
             pstmt.setString(2, project.getDescription());
-            pstmt.setTimestamp(3, java.sql.Timestamp.valueOf(project.getCreatedAt()));
-            pstmt.setTimestamp(4, java.sql.Timestamp.valueOf(project.getModifiedAt()));
+            pstmt.setInt(3, project.getCurrentCount());
+            pstmt.setInt(4, project.getMaxCount());
+            pstmt.setTimestamp(5, java.sql.Timestamp.valueOf(project.getCreatedAt()));
+            pstmt.setTimestamp(6, java.sql.Timestamp.valueOf(project.getModifiedAt()));
 
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows == 0) {
