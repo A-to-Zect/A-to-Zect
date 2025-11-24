@@ -3,6 +3,7 @@ package knu.atoz.project;
 import knu.atoz.mbti.project.ProjectMbtiRepository;
 import knu.atoz.member.Member;
 import knu.atoz.participant.ParticipantRepository;
+import knu.atoz.project.dto.MyProjectResponseDto;
 import knu.atoz.project.dto.ProjectCreateRequestDto;
 import knu.atoz.project.dto.ProjectUpdateRequestDto;
 import knu.atoz.project.exception.ProjectDescriptionInvalidException;
@@ -49,6 +50,10 @@ public class ProjectService {
 
     public List<Project> getMyProjectList(Long memberId) {
         return projectRepository.findProjectsByMemberId(memberId);
+    }
+
+    public List<MyProjectResponseDto> getMyProjectListAndRole(Long memberId) {
+        return projectRepository.findMyProjectDtos(memberId);
     }
 
     public List<Project> getMyLeaderProjectList(Member currentMember) {

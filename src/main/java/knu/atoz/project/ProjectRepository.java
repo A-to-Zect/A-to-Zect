@@ -1,5 +1,6 @@
 package knu.atoz.project;
 
+import knu.atoz.project.dto.MyProjectResponseDto;
 import knu.atoz.utils.Azconnection;
 import org.springframework.stereotype.Repository;
 
@@ -134,6 +135,41 @@ public class ProjectRepository {
         return projectList;
     }
 
+    // 기존 findProjectsByMemberId를 대체하거나 새로 만듭니다.
+    public List<MyProjectResponseDto> findMyProjectDtos(Long memberId) {
+        List<MyProjectResponseDto> list = new ArrayList<>();
+
+        // [핵심 SQL]
+        // 프로젝트 정보 + 참여자 테이블(pa)의 role 컬럼을 같이 가져옵니다.
+        String sql = "SELECT p.id, p.title, p.description, p.updated_at, pa.role " +
+                "FROM project p " +
+                "JOIN participant pa ON p.id = pa.project_id " +
+                "WHERE pa.member_id = ? " +  // 내가 참여한 프로젝트만
+                "ORDER BY p.updated_at DESC";
+
+        try (Connection conn = Azconnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setLong(1, memberId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    // 엔티티가 아닌 DTO에 데이터를 담습니다.
+                    MyProjectResponseDto dto = new MyProjectResponseDto(
+                            rs.getLong("id"),
+                            rs.getString("title"),
+                            rs.getString("description"),
+                            rs.getString("role"),
+                            rs.getObject("updated_at", LocalDateTime.class)
+                    );
+                    list.add(dto);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("내 프로젝트 조회 중 오류: " + e.getMessage());
+        }
+        return list;
+    }
 
     public Project save(Connection conn, Project project) throws SQLException {
         String sql = "INSERT INTO project (title, description, created_at, updated_at) VALUES (?, ?, ?, ?)";

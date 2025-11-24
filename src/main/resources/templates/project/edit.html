@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>프로젝트 수정</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="container" style="max-width: 600px;">
+    <h1>프로젝트 수정</h1>
+    <p class="subtitle">프로젝트 정보를 최신 상태로 업데이트하세요.</p>
+
+    <div class="text-right">
+        <a th:href="@{/projects/{id}(id=${projectId})}" class="btn btn-secondary">취소</a>
+    </div>
+    <hr>
+
+    <div th:if="${error}" class="error-msg" th:text="${error}"></div>
+
+    <form th:action="@{|/projects/${projectId}/edit|}" method="post" th:object="${updateDto}">
+
+        <h3>1. 기본 정보 수정</h3>
+
+        <div>
+            <label>프로젝트 제목</label>
+            <input type="text" th:field="*{title}" placeholder="제목을 입력하세요" required>
+        </div>
+
+        <div>
+            <label>설명</label>
+            <textarea th:field="*{description}" placeholder="프로젝트 설명을 입력하세요" required style="min-height: 150px;"></textarea>
+        </div>
+
+        <div class="info-card" style="margin-top: 20px; background: #f8f9fa; border: none;">
+            <p style="font-size: 13px; color: #666; margin: 0;">
+                💡 <strong>참고:</strong> 기술 스택과 MBTI 설정은 프로젝트 상세 페이지의 관리 메뉴에서 별도로 수정할 수 있습니다.
+            </p>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <button type="submit" class="btn btn-primary btn-block">수정 완료</button>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

@@ -5,7 +5,9 @@ import knu.atoz.mbti.project.ProjectMbtiService;
 import knu.atoz.member.Member;
 import knu.atoz.participant.ParticipantService;
 import knu.atoz.participant.exception.ParticipantException;
+import knu.atoz.project.dto.MyProjectResponseDto;
 import knu.atoz.project.dto.ProjectCreateRequestDto;
+import knu.atoz.project.dto.ProjectUpdateRequestDto;
 import knu.atoz.project.exception.ProjectException;
 import knu.atoz.techspec.Techspec;
 import knu.atoz.techspec.project.ProjectTechspecService;
@@ -95,7 +97,8 @@ public class ProjectController {
             return "redirect:/members/login";
         }
 
-        List<Project> myProjects = projectService.getMyProjectList(loginMember.getId());
+        // DTO 리스트를 받아옴
+        List<MyProjectResponseDto> myProjects = projectService.getMyProjectListAndRole(loginMember.getId());
         model.addAttribute("projects", myProjects);
 
         return "project/my-list";
@@ -146,6 +149,57 @@ public class ProjectController {
 
         } catch (Exception e) {
             return "redirect:/projects/my?error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
+        }
+    }
+
+    @GetMapping("/{projectId}/edit")
+    public String showEditForm(@PathVariable Long projectId,
+                               HttpSession session,
+                               Model model) {
+        Member loginMember = (Member) session.getAttribute("loginMember");
+        if (loginMember == null) {
+            return "redirect:/members/login";
+        }
+
+        try {
+
+            Project project = projectService.getMyProjectById(loginMember, projectId);
+
+            ProjectUpdateRequestDto updateDto = new ProjectUpdateRequestDto(
+                    project.getTitle(),
+                    project.getDescription()
+            );
+
+            model.addAttribute("updateDto", updateDto);
+            model.addAttribute("projectId", projectId);
+
+            return "project/edit";
+
+        } catch (Exception e) {
+            return "redirect:/projects/my?error=" + URLEncoder.encode("수정 권한이 없거나 존재하지 않는 프로젝트입니다.", StandardCharsets.UTF_8);
+        }
+    }
+
+    @PostMapping("/{projectId}/edit")
+    public String updateProject(@PathVariable Long projectId,
+                                @ModelAttribute ProjectUpdateRequestDto dto,
+                                HttpSession session,
+                                Model model) {
+        Member loginMember = (Member) session.getAttribute("loginMember");
+        if (loginMember == null) {
+            return "redirect:/members/login";
+        }
+
+        try {
+            projectService.updateProjectInfo(projectId, loginMember.getId(), dto);
+
+            return "redirect:/projects/" + projectId;
+
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("updateDto", dto); // 입력했던 내용 유지
+            model.addAttribute("projectId", projectId);
+            return "project/edit";
         }
     }
 }
