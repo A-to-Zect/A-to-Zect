@@ -1,12 +1,16 @@
 package knu.atoz.member;
 
 import jakarta.servlet.http.HttpSession;
-import knu.atoz.member.dto.SignupRequestDto;
 import knu.atoz.member.dto.LoginRequestDto;
+import knu.atoz.member.dto.MemberInfoResponseDto;
+import knu.atoz.member.dto.SignupRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/members")
@@ -62,5 +66,20 @@ public class MemberController {
     public String logout(HttpSession session) {
         session.invalidate(); // 세션 날리기
         return "redirect:/";
+    }
+
+    @GetMapping("/mypage")
+    public String showMyInfo(HttpSession session, Model model) {
+
+        Member loginMember = (Member) session.getAttribute("loginMember");
+        if (loginMember == null) {
+            return "redirect:/members/login";
+        }
+
+        MemberInfoResponseDto infoDto = memberService.getAllInfo(loginMember.getId());
+
+        model.addAttribute("info", infoDto);
+
+        return "member/mypage";
     }
 }

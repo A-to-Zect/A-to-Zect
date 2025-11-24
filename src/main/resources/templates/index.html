@@ -39,13 +39,12 @@
 
     <div th:if="${session.loginMember != null}">
         <h1>반갑습니다, <span th:text="${session.loginMember.name}" style="color: #007bff;">사용자</span>님!</h1>
-        <p class="subtitle">오늘도 즐거운 코딩 되세요.</p>
 
         <div class="menu-grid">
             <button class="btn btn-outline" onclick="alert('준비 중인 기능입니다.')">🚀 프로젝트 매칭</button>
             <button class="btn btn-outline" onclick="alert('준비 중인 기능입니다.')">📝 내 MBTI 관리</button>
             <button class="btn btn-outline" onclick="alert('준비 중인 기능입니다.')">💻 기술 스택 관리</button>
-            <button class="btn btn-outline" onclick="location.href='/members/my-info'">👤 내 정보 보기</button>
+            <button class="btn btn-outline" onclick="location.href='/members/mypage'">👤 내 정보 보기</button>
         </div>
 
         <div style="margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px;">

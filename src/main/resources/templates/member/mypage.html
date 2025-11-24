@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>내 정보</title>
+</head>
+<body>
+
+<h1>내 정보</h1>
+
+<!-- 상단 네비게이션 -->
+<div>
+    <a href="/">[메인으로]</a>
+    <a href="/members/logout">[로그아웃]</a>
+</div>
+
+<hr>
+
+<!-- 1. 기본 정보 -->
+<h3>기본 정보</h3>
+<ul>
+    <li><strong>이름:</strong> <span th:text="${info.name}">이름</span></li>
+    <li><strong>이메일:</strong> <span th:text="${info.email}">email@example.com</span></li>
+    <li><strong>생년월일:</strong> <span th:text="${info.birthDate}">2000-01-01</span></li>
+</ul>
+
+<hr>
+
+<!-- 2. MBTI -->
+<h3>MBTI</h3>
+<p th:if="${info.mbti != null}" th:text="${info.mbti}">ENTP</p>
+<p th:if="${info.mbti == null}">등록된 MBTI가 없습니다.</p>
+
+<hr>
+
+<!-- 3. 기술 스택 (콤마로 잘라서 리스트로 출력) -->
+<h3>기술 스택</h3>
+<!-- 데이터가 없을 때 -->
+<div th:if="${info.techspecs == null || info.techspecs.isEmpty()}">
+    <p>등록된 기술 스택이 없습니다.</p>
+</div>
+
+<!-- 데이터가 있을 때 리스트로 출력 -->
+<ul th:if="${info.techspecs != null}">
+    <li th:each="tech : ${#strings.arraySplit(info.techspecs, ',')}"
+        th:text="${#strings.trim(tech)}">Java</li>
+</ul>
+
+<hr>
+
+<!-- 4. 참여 프로젝트 (세미콜론으로 잘라서 리스트로 출력) -->
+<h3>참여 프로젝트 및 역할</h3>
+<!-- 데이터가 없을 때 -->
+<div th:if="${info.projectAndRole == null || info.projectAndRole.isEmpty()}">
+    <p>참여한 프로젝트가 없습니다.</p>
+</div>
+
+<!-- 데이터가 있을 때 리스트로 출력 -->
+<ul th:if="${info.projectAndRole != null}">
+    <li th:each="proj : ${#strings.arraySplit(info.projectAndRole, ';')}"
+        th:text="${#strings.trim(proj)}">프로젝트명 (팀장)</li>
+</ul>
+
+</body>
+</html>
