@@ -40,7 +40,7 @@ public class ProjectTechspecController {
             List<Techspec> techspecs = projectTechspecService.getProjectTechspecs(projectId);
             model.addAttribute("techspecs", techspecs);
 
-            return "project/techspec-manage"; // 뷰 이름
+            return "project/techspec"; // 뷰 이름
 
         } catch (Exception e) {
             return "redirect:/projects/my?error=" + encode(e.getMessage());

@@ -5,63 +5,78 @@
     <title>프로젝트 상세</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
-        /* 상세 페이지 전용 스타일 */
+        /* 상세 페이지 전용 스타일 (다시 정돈) */
         .detail-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
         .detail-header h1 {
             margin: 0;
             text-align: left;
             font-size: 26px;
             line-height: 1.2;
+            color: #222;
         }
 
+        /* 각 섹션을 감싸는 흰색 카드 (더 깔끔하게) */
         .detail-section {
             background: #fff;
-            border: 1px solid #e1e4e8;
+            border: 1px solid #e9ecef; /* 더 연한 테두리 */
             border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
         }
 
+        /* 섹션 제목 스타일 (기존 스타일 복구 + 버튼 배치용) */
+        .section-title-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
         .section-title {
-            margin-top: 0;
-            margin-bottom: 20px;
+            margin: 0;
             font-size: 18px;
+            font-weight: 700;
             color: #333;
-            border-left: 4px solid #007bff;
+            border-left: 4px solid #007bff; /* 파란색 테두리 복구 */
             padding-left: 12px;
         }
 
+        /* 리더 전용 미니 버튼 스타일 */
+        .btn-manage-mini {
+            font-size: 13px;
+            color: #888;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: color 0.2s, background 0.2s;
+        }
+        .btn-manage-mini:hover {
+            color: #007bff;
+            background: #f1f3f5;
+        }
+
+        /* 기타 요소 스타일 */
         .tech-tags-container { display: flex; flex-wrap: wrap; gap: 8px; }
         .mbti-card { background: #f8f9fa; border: 1px solid #eee; border-radius: 10px; padding: 12px 20px; display: flex; align-items: center; }
 
-        /* 모집 현황 뱃지 스타일 */
+        /* 모집 현황 뱃지 */
         .recruit-badge {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-            background-color: #eef2ff;
-            color: #4f46e5;
-            margin-top: 8px;
+            display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; background-color: #eef2ff; color: #4f46e5; margin-top: 10px;
         }
-        /* 마감되었을 때 빨간색 처리 */
-        .recruit-badge.full {
-            background-color: #fff5f5;
-            color: #e03131;
-            border: 1px solid #ffc9c9;
-        }
+        .recruit-badge.full { background-color: #fff5f5; color: #e03131; border: 1px solid #ffc9c9; }
     </style>
 </head>
 <body>
 
-<div class="container" style="max-width: 800px;">
+<div class="container" style="max-width: 800px; padding-top: 40px;">
 
     <div class="detail-header">
         <div>
@@ -86,15 +101,24 @@
     </div>
 
     <div class="detail-section">
-        <h3 class="section-title">1. 프로젝트 설명</h3>
-        <div style="line-height: 1.8; color: #555; white-space: pre-wrap;"
-             th:text="${project.description}">
-            내용
+        <div class="section-title-wrapper">
+            <h3 class="section-title">1. 프로젝트 설명</h3>
+            <a th:if="${myRole == 'LEADER'}" th:href="@{/projects/{id}/edit(id=${project.id})}" class="btn-manage-mini">
+                ✏️ 기본 정보 수정
+            </a>
         </div>
+        <div style="line-height: 1.8; color: #555; white-space: pre-wrap; font-size: 15px;"
+             th:text="${project.description}">내용</div>
     </div>
 
     <div class="detail-section">
-        <h3 class="section-title">2. 사용 기술 스택</h3>
+        <div class="section-title-wrapper">
+            <h3 class="section-title">2. 사용 기술 스택</h3>
+            <a th:if="${myRole == 'LEADER'}" th:href="@{/projects/{id}/techspecs(id=${project.id})}" class="btn-manage-mini">
+                ⚙️ 스택 관리
+            </a>
+        </div>
+
         <div class="tech-tags-container">
             <th:block th:if="${techSpecs != null && !techSpecs.isEmpty()}">
                 <span th:each="spec : ${techSpecs}"
@@ -102,14 +126,20 @@
                       style="font-size: 14px; padding: 6px 12px;"
                       th:text="${spec.name}">Java</span>
             </th:block>
-            <span th:if="${techSpecs == null || techSpecs.isEmpty()}" style="color: #999;">
+            <span th:if="${techSpecs == null || techSpecs.isEmpty()}" style="color: #999; font-size: 14px;">
                 등록된 기술 스택이 없습니다.
             </span>
         </div>
     </div>
 
     <div class="detail-section">
-        <h3 class="section-title">3. 선호 MBTI</h3>
+        <div class="section-title-wrapper">
+            <h3 class="section-title">3. 선호 MBTI</h3>
+            <a th:if="${myRole == 'LEADER'}" href="#" onclick="alert('MBTI 수정 기능은 준비중입니다.')" class="btn-manage-mini">
+                ✏️ MBTI 수정
+            </a>
+        </div>
+
         <div style="display: flex; flex-wrap: wrap; gap: 15px;">
             <div th:each="entry : ${mbtiMap}" class="mbti-card">
                 <span style="color: #666; font-size: 13px; font-weight: bold; margin-right: 12px;">
@@ -125,23 +155,23 @@
         </div>
     </div>
 
-    <div class="detail-section" style="border-color: #007bff; background-color: #f8fbff;">
-        <h3 class="section-title" style="margin-bottom: 15px;">🚀 프로젝트 참여</h3>
+    <div class="detail-section" style="border-color: #007bff; background-color: #f8fbff; box-shadow: 0 8px 20px rgba(0,123,255,0.08);">
+        <h3 class="section-title" style="margin-bottom: 25px;">🚀 프로젝트 참여</h3>
 
         <div th:if="${myRole == 'LEADER'}">
-            <a th:href="@{/projects/{id}/manage(id=${project.id})}" class="btn btn-primary btn-block">
+            <a th:href="@{/projects/{id}/manage(id=${project.id})}" class="btn btn-primary btn-block" style="padding: 15px; font-size: 16px;">
                 👥 신청자 관리 (리더 전용)
             </a>
         </div>
 
         <div th:if="${myRole == 'MEMBER'}">
-            <button class="btn btn-success btn-block" disabled style="opacity: 1; cursor: default;">
+            <button class="btn btn-success btn-block" disabled style="opacity: 1; cursor: default; padding: 15px; font-size: 16px;">
                 ✅ 현재 팀원으로 참여 중입니다.
             </button>
         </div>
 
         <div th:if="${myRole == 'PENDING'}">
-            <button class="btn btn-secondary btn-block" disabled style="cursor: default;">
+            <button class="btn btn-secondary btn-block" disabled style="cursor: default; padding: 15px; font-size: 16px;">
                 🕒 리더의 승인을 기다리고 있습니다...
             </button>
         </div>
@@ -150,36 +180,40 @@
             <form th:if="${project.currentCount < project.maxCount}"
                   th:action="@{|/projects/${project.id}/apply|}" method="post">
                 <button type="submit" class="btn btn-primary btn-block"
+                        style="padding: 15px; font-size: 16px;"
                         onclick="return confirm('프로젝트에 참가 신청하시겠습니까?');">
                     🚀 참가 신청하기
                 </button>
             </form>
 
             <button th:if="${project.currentCount >= project.maxCount}"
-                    class="btn btn-danger btn-block" disabled>
+                    class="btn btn-danger btn-block" disabled style="padding: 15px; font-size: 16px;">
                 🚫 모집이 마감되었습니다.
             </button>
         </div>
     </div>
 
-    <div class="detail-section" style="background: #fbfbfc;">
-        <h3 class="section-title" style="border-left-color: #28a745;">5. 프로젝트 활동 (팀원 전용)</h3>
+    <div class="detail-section" style="background: #fbfbfc; border-color: #e9ecef;">
+        <h3 class="section-title" style="border-left-color: #28a745;">4. 프로젝트 활동</h3>
 
-        <div class="menu-grid" style="margin-top: 10px;"
+        <div class="menu-grid" style="margin-top: 25px;"
              th:styleappend="${myRole != 'LEADER' and myRole != 'MEMBER'} ? 'opacity: 0.5; pointer-events: none;' : ''">
-            <button class="btn btn-outline btn-block" style="color: #555; background: white; padding: 15px;">
-                📋 게시판 보기
+            <button class="btn btn-outline btn-block" style="color: #555; background: white; padding: 20px; font-size: 15px;">
+                📋 게시판
             </button>
-            <button class="btn btn-outline btn-block" style="color: #555; background: white; padding: 15px;">
-                📅 일정 관리
+            <button class="btn btn-outline btn-block" style="color: #555; background: white; padding: 20px; font-size: 15px;">
+                🔗 링크 아카이브
             </button>
-            <button class="btn btn-outline btn-block" style="color: #555; background: white; padding: 15px;">
-                💬 팀 채팅
+            <button class="btn btn-outline btn-block" style="color: #555; background: white; padding: 20px; font-size: 15px;">
+                🗃️ 문서 아카이브
+            </button>
+            <button class="btn btn-outline btn-block" style="color: #555; background: white; padding: 20px; font-size: 15px;">
+                💬 회의록 아카이브
             </button>
         </div>
 
         <div th:if="${myRole != 'LEADER' and myRole != 'MEMBER'}"
-             style="text-align: center; font-size: 13px; color: #999; margin-top: 10px;">
+             style="text-align: center; font-size: 13px; color: #999; margin-top: 15px;">
             * 프로젝트 팀원이 되면 이용할 수 있습니다.
         </div>
     </div>
