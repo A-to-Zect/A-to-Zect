@@ -56,10 +56,6 @@ public class ProjectService {
         return projectRepository.findMyProjectDtos(memberId);
     }
 
-    public List<Project> getMyLeaderProjectList(Member currentMember) {
-        return projectRepository.findLeaderProjectsByMemberId(currentMember.getId());
-    }
-
     public Project getProject(Long projectId) {
         Project project = projectRepository.findById(projectId);
         if  (project == null) {

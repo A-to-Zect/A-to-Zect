@@ -102,49 +102,14 @@ public class ProjectRepository {
         return projectList;
     }
 
-    public List<Project> findLeaderProjectsByMemberId(Long memberId) {
-        List<Project> projectList = new ArrayList<>();
 
-        String sql = "SELECT p.id, p.title, p.description, p.created_at, p.updated_at " +
-                "FROM project p " +
-                "JOIN participant pa ON p.id = pa.project_id " +
-                "WHERE pa.member_id = ? " +
-                "AND pa.role = 'LEADER' " +
-                "ORDER BY p.updated_at DESC";
-
-        try (Connection conn = Azconnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setLong(1, memberId);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    Project project = new Project(
-                            rs.getLong("id"),
-                            rs.getString("title"),
-                            rs.getString("description"),
-                            rs.getObject("created_at", LocalDateTime.class),
-                            rs.getObject("updated_at", LocalDateTime.class)
-                    );
-                    projectList.add(project);
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("DB 조회 중 오류 발생: " + e.getMessage());
-        }
-        return projectList;
-    }
-
-    // 기존 findProjectsByMemberId를 대체하거나 새로 만듭니다.
     public List<MyProjectResponseDto> findMyProjectDtos(Long memberId) {
         List<MyProjectResponseDto> list = new ArrayList<>();
 
-        // [핵심 SQL]
-        // 프로젝트 정보 + 참여자 테이블(pa)의 role 컬럼을 같이 가져옵니다.
         String sql = "SELECT p.id, p.title, p.description, p.updated_at, pa.role " +
                 "FROM project p " +
                 "JOIN participant pa ON p.id = pa.project_id " +
-                "WHERE pa.member_id = ? " +  // 내가 참여한 프로젝트만
+                "WHERE pa.member_id = ? " +
                 "ORDER BY p.updated_at DESC";
 
         try (Connection conn = Azconnection.getConnection();
@@ -154,7 +119,7 @@ public class ProjectRepository {
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
-                    // 엔티티가 아닌 DTO에 데이터를 담습니다.
+
                     MyProjectResponseDto dto = new MyProjectResponseDto(
                             rs.getLong("id"),
                             rs.getString("title"),
@@ -254,11 +219,7 @@ public class ProjectRepository {
         return false;
     }
 
-    /**
-     * @param memberId 현재 로그인한 회원의 ID
-     * @param projectId 사용자가 선택한 프로젝트의 ID
-     * @return 찾았으면 Project 객체, 못 찾았으면(참여 안 했으면) null
-     */
+
     public Project findMyProjectByIdAndMemberId(Long memberId, Long projectId) {
         String sql = "SELECT p.* " +
                 "FROM Project p " +
@@ -289,12 +250,6 @@ public class ProjectRepository {
     }
 
 
-    /**
-     * @param conn Service에서 전달받은 트랜잭션 Connection
-     * @param projectId 조회할 프로젝트의 ID
-     * @return
-     * @throws SQLException
-     */
     public Project findProjectById(Connection conn, Long projectId) throws SQLException {
         String sql = "SELECT * FROM Project WHERE id = ?";
 
