@@ -162,7 +162,14 @@
     </div>
 
     <div class="info-card">
-        <h3 style="margin-top: 0; border-left: none; padding-left: 0;">🚀 참여 프로젝트 이력</h3>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="margin: 0; border-left: none; padding-left: 0;">🚀 참여 중인 프로젝트</h3>
+
+            <a href="/projects/my" class="btn btn-outline" style="font-size: 12px; padding: 4px 12px;">
+                목록 바로가기 >
+            </a>
+        </div>
 
         <div th:if="${info.projects == null || info.projects.isEmpty()}"
              style="text-align: center; color: #999; padding: 20px;">
@@ -171,15 +178,13 @@
 
         <div th:if="${info.projects != null}">
             <div th:each="p : ${info.projects}" class="project-item">
-
                 <a th:href="@{/projects/{id}(id=${p.id})}"
                    style="text-decoration: none; color: inherit; display: flex; justify-content: space-between; align-items: center; width: 100%;">
 
                     <span th:text="${p.title}" style="font-weight: bold;">프로젝트 제목</span>
 
-                    <span style="color: #ccc; font-size: 12px;">바로가기 ></span>
+                    <span style="color: #ccc; font-size: 12px;">상세보기 ></span>
                 </a>
-
             </div>
         </div>
     </div>
