@@ -1,0 +1,16 @@
+<nav>
+    <a href="/">홈</a>
+
+    <span th:if="${session.loginMember == null}">
+        <a href="/members/login">로그인</a>
+        <a href="/members/signup">회원가입</a>
+    </span>
+
+    <span th:if="${session.loginMember != null}">
+        <span th:text="${session.loginMember.name} + '님 환영합니다!'"></span>
+        <a href="/members/my-info">내 정보</a>
+        <a href="/members/logout">로그아웃</a>
+        <a href="/matching">매칭 시작</a>
+    </span>
+</nav>
+<hr>
