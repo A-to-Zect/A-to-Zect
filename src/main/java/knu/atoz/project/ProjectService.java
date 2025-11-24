@@ -1,7 +1,6 @@
 package knu.atoz.project;
 
 import knu.atoz.mbti.project.ProjectMbtiRepository;
-import knu.atoz.member.Member;
 import knu.atoz.participant.ParticipantRepository;
 import knu.atoz.project.dto.MyProjectResponseDto;
 import knu.atoz.project.dto.ProjectCreateRequestDto;
@@ -64,8 +63,8 @@ public class ProjectService {
         return project;
     }
 
-    public Project getMyProjectById(Member currentUser, Long projectId) {
-        Project project = projectRepository.findMyProjectByIdAndMemberId(currentUser.getId(), projectId);
+    public Project getMyProjectById(Long memberId, Long projectId) {
+        Project project = projectRepository.findMyProjectByIdAndMemberId(memberId, projectId);
         if  (project == null) {
             throw new ProjectNotFoundException();
         }

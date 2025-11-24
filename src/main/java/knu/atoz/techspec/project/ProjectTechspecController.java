@@ -33,7 +33,7 @@ public class ProjectTechspecController {
 
         try {
             // 본인 프로젝트인지 등 권한 체크 및 프로젝트 정보 조회
-            Project project = projectService.getMyProjectById(loginMember, projectId);
+            Project project = projectService.getMyProjectById(loginMember.getId(), projectId);
             model.addAttribute("project", project);
 
             // 현재 등록된 기술 스택 목록 조회

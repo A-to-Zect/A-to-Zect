@@ -132,16 +132,12 @@ public class ProjectController {
         }
 
         try {
-            // 1. 프로젝트 기본 정보 조회
-            Project project = projectService.getMyProjectById(loginMember, projectId);
+            Project project = projectService.getProject(projectId);
             model.addAttribute("project", project);
 
-            // 2. [추가] 기술 스택 조회 (서비스에 메서드가 있다고 가정)
-            // 만약 Set<String>이나 List<String>을 반환한다면 그대로 모델에 넣습니다.
             List<Techspec> techSpecs = projectTechspecService.getProjectTechspecs(projectId);
             model.addAttribute("techSpecs", techSpecs);
 
-            // 3. [추가] MBTI 정보 조회
             Map<Long, String> mbtiMap = projectMbtiService.getMbtiMapByProjectId(projectId);
             model.addAttribute("mbtiMap", mbtiMap);
 
@@ -163,7 +159,7 @@ public class ProjectController {
 
         try {
 
-            Project project = projectService.getMyProjectById(loginMember, projectId);
+            Project project = projectService.getMyProjectById(loginMember.getId(), projectId);
 
             ProjectUpdateRequestDto updateDto = new ProjectUpdateRequestDto(
                     project.getTitle(),
