@@ -16,7 +16,7 @@
         [[${error}]]
     </div>
 
-    <form th:action="${isNew} ? @{/documents(projectId=${projectId})} : @{/documents/{id}(id=${document.id}, projectId=${projectId})}"
+    <form th:action="${actionUrl}"
           th:object="${documentRequestDto}" method="post">
 
         <input th:if="${!isNew}" type="hidden" name="_method" value="put"/>
