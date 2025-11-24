@@ -6,69 +6,35 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 
     <style>
-        /* 마이페이지 전용 스타일 */
-
-        /* 상단 헤더 (인덱스와 동일) */
-        .header-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
-        }
+        .header-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
         .brand-logo { font-size: 22px; font-weight: 800; color: #007bff; }
-
-        /* 정보 섹션 카드 스타일 */
-        .info-card {
-            background: #fff;
-            border: 1px solid #e1e4e8;
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 20px;
-        }
-
-        /* 라벨-값 쌍 정렬 */
-        .info-row {
-            display: flex;
-            margin-bottom: 12px;
-            border-bottom: 1px solid #f5f5f5;
-            padding-bottom: 12px;
-        }
+        .info-card { background: #fff; border: 1px solid #e1e4e8; border-radius: 12px; padding: 25px; margin-bottom: 20px; }
+        .info-row { display: flex; margin-bottom: 12px; border-bottom: 1px solid #f5f5f5; padding-bottom: 12px; }
         .info-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .info-label { width: 120px; font-weight: bold; color: #555; flex-shrink: 0; }
+        .info-value { color: #333; font-weight: 500; }
+        .mbti-badge { display: inline-block; font-size: 20px; font-weight: 800; color: #4f46e5; background: #eef2ff; padding: 8px 16px; border-radius: 8px; letter-spacing: 2px; }
+        .project-item { background: #f8f9fa; padding: 12px 15px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #007bff; font-size: 15px; color: #333; }
 
-        .info-label {
-            width: 120px;
+        .withdraw-section {
+            text-align: right;
+            margin-top: 50px;
+            margin-bottom: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .btn-text-danger {
+            background: none;
+            border: none;
+            color: #dc3545;
+            font-size: 13px;
+            text-decoration: underline;
+            cursor: pointer;
+            padding: 0;
+        }
+        .btn-text-danger:hover {
+            color: #a71d2a;
             font-weight: bold;
-            color: #555;
-            flex-shrink: 0; /* 라벨 너비 고정 */
-        }
-        .info-value {
-            color: #333;
-            font-weight: 500;
-        }
-
-        /* MBTI 뱃지 */
-        .mbti-badge {
-            display: inline-block;
-            font-size: 20px;
-            font-weight: 800;
-            color: #4f46e5;
-            background: #eef2ff;
-            padding: 8px 16px;
-            border-radius: 8px;
-            letter-spacing: 2px;
-        }
-
-        /* 프로젝트 리스트 스타일 */
-        .project-item {
-            background: #f8f9fa;
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            border-left: 4px solid #007bff; /* 왼쪽 포인트 컬러 */
-            font-size: 15px;
-            color: #333;
         }
     </style>
 </head>
@@ -107,7 +73,6 @@
 
         <div style="text-align: center; margin-top: 30px; display: flex; justify-content: center; gap: 10px;">
             <a href="/members/edit" class="btn btn-primary">정보 수정하기</a>
-
             <a href="/members/password" class="btn btn-outline">비밀번호 변경</a>
         </div>
     </div>
@@ -118,10 +83,8 @@
         </h3>
 
         <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px dashed #eee; margin-bottom: 15px;">
-
             <div style="display: flex; align-items: center; gap: 20px;">
                 <span style="font-size: 14px; font-weight: bold; color: #555; width: 80px;">나의 MBTI</span>
-
                 <div th:if="${info.mbti != null}">
                     <span class="mbti-badge" th:text="${info.mbti}" style="font-size: 16px; padding: 5px 12px;">ENTP</span>
                 </div>
@@ -129,43 +92,35 @@
                     미설정
                 </div>
             </div>
-
             <a href="/members/mbti" class="btn btn-outline" style="font-size: 12px; padding: 4px 12px; flex-shrink: 0;">
                 수정
             </a>
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center;">
-
             <div style="display: flex; align-items: center; gap: 20px; flex-grow: 1; margin-right: 15px;">
                 <span style="font-size: 14px; font-weight: bold; color: #555; width: 80px; flex-shrink: 0;">기술 스택</span>
-
                 <div style="display: flex; flex-wrap: wrap; gap: 5px;">
                     <div th:if="${info.techspecs == null || info.techspecs.isEmpty()}" style="color: #ccc; font-size: 14px;">
                         등록된 스택 없음
                     </div>
-
                     <th:block th:if="${info.techspecs != null}">
-                    <span th:each="tech : ${#strings.arraySplit(info.techspecs, ',')}"
-                          class="badge"
-                          style="font-size: 13px; padding: 5px 10px; background-color: #f1f3f5; color: #495057;"
-                          th:text="${#strings.trim(tech)}">Java</span>
+                        <span th:each="tech : ${#strings.arraySplit(info.techspecs, ',')}"
+                              class="badge"
+                              style="font-size: 13px; padding: 5px 10px; background-color: #f1f3f5; color: #495057;"
+                              th:text="${#strings.trim(tech)}">Java</span>
                     </th:block>
                 </div>
             </div>
-
             <a href="/members/techspecs" class="btn btn-outline" style="font-size: 12px; padding: 4px 12px; flex-shrink: 0;">
                 관리
             </a>
         </div>
-
     </div>
 
     <div class="info-card">
-
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <h3 style="margin: 0; border-left: none; padding-left: 0;">🚀 참여 중인 프로젝트</h3>
-
             <a href="/projects/my" class="btn btn-outline" style="font-size: 12px; padding: 4px 12px;">
                 목록 바로가기 >
             </a>
@@ -180,13 +135,18 @@
             <div th:each="p : ${info.projects}" class="project-item">
                 <a th:href="@{/projects/{id}(id=${p.id})}"
                    style="text-decoration: none; color: inherit; display: flex; justify-content: space-between; align-items: center; width: 100%;">
-
                     <span th:text="${p.title}" style="font-weight: bold;">프로젝트 제목</span>
-
                     <span style="color: #ccc; font-size: 12px;">상세보기 ></span>
                 </a>
             </div>
         </div>
+    </div>
+
+    <div class="withdraw-section">
+        <form action="/members/withdraw" method="post" onsubmit="return confirm('정말로 탈퇴하시겠습니까? 탈퇴 시 작성한 게시글과 정보가 모두 삭제됩니다.');">
+            <span style="color: #999; font-size: 13px; margin-right: 10px;">더 이상 이용하지 않으시나요?</span>
+            <button type="submit" class="btn-text-danger">회원 탈퇴하기</button>
+        </form>
     </div>
 
 </div>

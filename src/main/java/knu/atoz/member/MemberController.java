@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Controller
@@ -170,6 +172,25 @@ public class MemberController {
             model.addAttribute("error", "비밀번호 변경 실패: " + e.getMessage());
             model.addAttribute("passwordDto", dto);
             return "member/edit-password";
+        }
+    }
+
+    @PostMapping("/withdraw")
+    public String withdraw(HttpSession session) {
+        Member loginMember = (Member) session.getAttribute("loginMember");
+        if (loginMember == null) {
+            return "redirect:/members/login";
+        }
+
+        try {
+            memberService.delete(loginMember.getId());
+
+            session.invalidate();
+
+            return "redirect:/";
+
+        } catch (Exception e) {
+            return "redirect:/members/mypage?error=" + URLEncoder.encode("탈퇴 처리에 실패했습니다.", StandardCharsets.UTF_8);
         }
     }
 }

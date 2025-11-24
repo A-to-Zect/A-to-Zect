@@ -64,11 +64,11 @@ public class MemberService {
 
     public boolean isLoggedIn() {
         return true;
-    } 
+    } // 컴파일 에러 방지용 임시 코드
 
     public Member getCurrentUser(){
         return new Member(1L, "1", "1", "1", LocalDate.now(), LocalDateTime.now());
-    } 
+    } // 컴파일 에러 방지용 임시 코드
 
     public Member updateMember(Long memberId, MemberUpdateRequestDto dto) {
 
@@ -99,5 +99,14 @@ public class MemberService {
         memberRepository.update(updatedMember);
 
         return updatedMember;
+    }
+
+
+    public void delete(Long memberId) {
+        Member member = memberRepository.findById(memberId);
+        if (member == null) {
+            throw new MemberNotFoundException();
+        }
+        memberRepository.delete(memberId);
     }
 }
