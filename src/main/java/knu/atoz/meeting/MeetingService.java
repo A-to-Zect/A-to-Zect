@@ -4,10 +4,12 @@ import knu.atoz.meeting.dto.MeetingRequestDto;
 import knu.atoz.meeting.exception.InvalidMeetingInputException;
 import knu.atoz.meeting.exception.MeetingAccessException;
 import knu.atoz.meeting.exception.MeetingNotFoundException;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.time.LocalDateTime;
 
+@Service
 public class MeetingService {
 
     private final MeetingRepository meetingRepository;
