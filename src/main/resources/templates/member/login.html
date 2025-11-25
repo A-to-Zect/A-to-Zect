@@ -4,6 +4,25 @@
     <meta charset="UTF-8">
     <title>AtoZect - 로그인</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <style>
+        /* 유효성 검사 에러 스타일 (회원가입과 동일) */
+        .field-error {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 0;
+            margin-bottom: 15px; /* 다음 요소와의 간격 */
+            font-weight: bold;
+            text-align: left;
+        }
+
+        /* 에러가 난 입력창 스타일 */
+        .input-error {
+            border-color: #dc3545 !important;
+            background-color: #fff8f8 !important;
+            margin-bottom: 5px !important; /* 에러 메시지와 가깝게 붙임 */
+        }
+    </style>
 </head>
 <body>
 
@@ -14,23 +33,29 @@
 
     <hr>
 
-    <div th:if="${error}" class="error-msg">
-        <span th:text="${error}">아이디 또는 비밀번호가 잘못되었습니다.</span>
-    </div>
+    <div th:if="${error}" class="error-msg" th:text="${error}" style="margin-bottom: 20px;"></div>
 
     <form th:action="@{/members/login}" th:object="${loginDto}" method="post">
 
         <div style="text-align: left;">
             <label for="email">이메일</label>
-            <input type="text" th:field="*{email}" placeholder="이메일을 입력하세요" required>
+            <input type="text" th:field="*{email}"
+                   placeholder="이메일을 입력하세요"
+                   th:errorclass="input-error">
+
+            <div class="field-error" th:errors="*{email}"></div>
         </div>
 
         <div style="text-align: left;">
             <label for="password">비밀번호</label>
-            <input type="password" th:field="*{password}" placeholder="비밀번호를 입력하세요" required>
+            <input type="password" th:field="*{password}"
+                   placeholder="비밀번호를 입력하세요"
+                   th:errorclass="input-error">
+
+            <div class="field-error" th:errors="*{password}"></div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block" style="margin-top: 20px;">
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top: 10px;">
             로그인
         </button>
     </form>

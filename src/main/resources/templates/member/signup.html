@@ -4,48 +4,80 @@
     <meta charset="UTF-8">
     <title>AtoZect - 회원가입</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <style>
+        /* 유효성 검사 에러 스타일 */
+        .field-error {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 0; /* 위쪽 여백 제거 */
+            margin-bottom: 15px; /* 다음 입력창과의 거리 확보 */
+            font-weight: bold;
+            text-align: left;
+        }
+
+        /* 에러가 난 입력창 스타일 */
+        .input-error {
+            border-color: #dc3545 !important;
+            background-color: #fff8f8 !important;
+            /* [핵심] 에러 발생 시 입력창 아래 여백을 줄여서 메시지와 딱 붙게 함 */
+            margin-bottom: 5px !important;
+        }
+    </style>
 </head>
 <body>
 
 <div class="container" style="max-width: 500px;">
 
     <h1>회원가입</h1>
-    <p class="subtitle">A to Zect와 함께 새로운 여정을 시작하세요.</p>
+    <p class="subtitle">AtoZect와 함께 새로운 여정을 시작하세요.</p>
 
     <hr>
 
-    <div th:if="${error}" class="error-msg" th:text="${error}">
-        에러 메시지가 여기에 표시됩니다.
-    </div>
+    <div th:if="${error}" class="error-msg" th:text="${error}" style="margin-bottom: 15px;"></div>
 
     <form action="/members/signup" method="post" th:object="${signupDto}">
 
         <div>
             <label for="email">이메일</label>
-            <input type="email" th:field="*{email}" placeholder="example@email.com" required>
+            <input type="text" th:field="*{email}"
+                   placeholder="example@email.com"
+                   th:errorclass="input-error">
+            <div class="field-error" th:errors="*{email}"></div>
         </div>
 
         <div>
             <label for="password">비밀번호</label>
-            <input type="password" th:field="*{password}" placeholder="비밀번호를 입력하세요" required>
+            <input type="password" th:field="*{password}"
+                   placeholder="8~20자 이내로 입력하세요"
+                   th:errorclass="input-error">
+            <div class="field-error" th:errors="*{password}"></div>
         </div>
 
         <div>
             <label for="confirmPassword">비밀번호 확인</label>
-            <input type="password" th:field="*{confirmPassword}" placeholder="비밀번호를 한 번 더 입력하세요" required>
+            <input type="password" th:field="*{confirmPassword}"
+                   placeholder="비밀번호를 한 번 더 입력하세요"
+                   th:errorclass="input-error">
+            <div class="field-error" th:errors="*{confirmPassword}"></div>
         </div>
 
         <div>
             <label for="name">이름</label>
-            <input type="text" th:field="*{name}" placeholder="실명을 입력하세요" required>
+            <input type="text" th:field="*{name}"
+                   placeholder="실명을 입력하세요"
+                   th:errorclass="input-error">
+            <div class="field-error" th:errors="*{name}"></div>
         </div>
 
         <div>
             <label for="birthDate">생년월일</label>
-            <input type="date" th:field="*{birthDate}" required>
+            <input type="date" th:field="*{birthDate}"
+                   th:errorclass="input-error">
+            <div class="field-error" th:errors="*{birthDate}"></div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block" style="margin-top: 20px;">
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top: 10px;">
             가입하기
         </button>
     </form>
