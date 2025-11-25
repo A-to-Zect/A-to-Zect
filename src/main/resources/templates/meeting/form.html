@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${isNew} ? '회의록 작성' : '회의록 수정'">회의록 관리</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="container" style="max-width: 700px;">
+
+    <h1 th:text="${isNew} ? '📝 새 회의록 작성' : '📝 회의록 수정'">제목</h1>
+
+    <div class="text-right">
+        <a th:href="@{|/projects/${project.id}/meetings|}" class="btn btn-secondary">목록으로</a>
+    </div>
+    <hr>
+
+    <div th:if="${error}" class="error-msg" th:text="${error}"></div>
+
+    <form th:action="${isNew} ? @{|/projects/${project.id}/meetings/new|} : @{|/projects/${project.id}/meetings/${meeting.id}/edit|}"
+          method="post"
+          th:object="${meetingDto}">
+
+        <div>
+            <label for="title">회의 제목</label>
+            <input type="text" id="title" th:field="*{title}" placeholder="예: 1차 아이디어 회의" required>
+        </div>
+
+        <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+            <div style="flex: 1;">
+                <label for="startTime">시작 시간</label>
+                <input type="datetime-local" id="startTime" th:field="*{startTime}">
+            </div>
+            <div style="flex: 1;">
+                <label for="endTime">종료 시간</label>
+                <input type="datetime-local" id="endTime" th:field="*{endTime}">
+            </div>
+        </div>
+        <p style="font-size: 12px; color: #888; margin-top: -10px; margin-bottom: 20px;">
+            * 시간은 비워두거나, 둘 다 입력해야 합니다. 종료 시간은 시작 시간보다 늦어야 합니다.
+        </p>
+
+        <div>
+            <label for="description">회의 내용</label>
+            <textarea id="description" th:field="*{description}" rows="10" placeholder="회의 내용을 자유롭게 작성하세요..." required></textarea>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <button type="submit" class="btn btn-primary btn-block">
+                <span th:text="${isNew} ? '저장하기' : '수정 완료'"></span>
+            </button>
+        </div>
+    </form>
+
+</div>
+
+</body>
+</html>
