@@ -1,100 +1,68 @@
 package knu.atoz.reply;
 
-import knu.atoz.post.exception.InvalidPostException;
 import knu.atoz.reply.dto.ReplyRequestDto;
 import knu.atoz.reply.dto.ReplyResponseDto;
-import knu.atoz.reply.exception.InvalidReplyException;
-import knu.atoz.reply.exception.ReplyNotFoundException;
-import knu.atoz.reply.exception.ReplyNotInPostException;
-import knu.atoz.reply.exception.UnauthorizedReplyAccessException;
+import knu.atoz.reply.exception.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+@Service
+@RequiredArgsConstructor
 public class ReplyService {
 
     private final ReplyRepository replyRepository;
-    public ReplyService(ReplyRepository replyRepository) {
-        this.replyRepository = replyRepository;
-    }
 
-    public List<ReplyResponseDto> getReplyList(Long postId){
-        if (postId == null){
-            throw new InvalidReplyException("게시물 ID가 필요합니다.");
-        }
+    // 댓글 목록 조회 (작성자 이름 포함)
+    public List<ReplyResponseDto> getReplyList(Long postId) {
+        if (postId == null) throw new InvalidReplyException("게시물 ID가 필요합니다.");
         return replyRepository.findAllByPostId(postId);
     }
 
-    public List<Reply> getMyReplyList(Long postId, Long memberId){
-        if (postId == null){
-            throw new InvalidReplyException("게시물 ID가 필요합니다.");
-        }
-        if (memberId == null){
-            throw new InvalidReplyException("회원 ID가 필요합니다.");
-        }
-        return replyRepository.findMyReplyByPostIdAndMemberId(postId, memberId);
-    }
-
-    public Reply getReply(Long replyId){
+    // 댓글 단건 조회 (수정/삭제 권한 체크용)
+    public Reply getReply(Long replyId) {
         Reply reply = replyRepository.findById(replyId);
-        if (reply == null){
-            throw new ReplyNotFoundException();
-        }
-
+        if (reply == null) throw new ReplyNotFoundException();
         return reply;
     }
 
-    public void createReply(Long postId, Long memberId, ReplyRequestDto requestDto){
-        if (postId == null){
-            throw new InvalidReplyException("게시물 ID가 필요합니다.");
-        }
-        if (memberId == null){
-            throw new InvalidReplyException("회원 ID가 필요합니다.");
-        }
+    // 댓글 작성
+    public void createReply(Long postId, Long memberId, ReplyRequestDto requestDto) {
         if (requestDto.getContent() == null || requestDto.getContent().trim().isEmpty()) {
-            throw new InvalidPostException("댓글 내용은 필수입니다.");
+            throw new InvalidReplyException("댓글 내용을 입력해주세요.");
         }
-
         Reply reply = new Reply(postId, memberId, requestDto.getContent());
-
         replyRepository.save(reply);
     }
 
-    public void updateReply(Long postId, Long replyId, Long memberId, ReplyRequestDto requestDto){
-        Reply original =  replyRepository.findById(replyId);
-        if (original == null){
-            throw new ReplyNotFoundException();
-        }
+    // 댓글 수정
+    public void updateReply(Long replyId, Long memberId, ReplyRequestDto requestDto) {
+        Reply original = getReply(replyId); // 존재 확인
 
-        if (!original.getPostId().equals(postId)){
-            throw new ReplyNotInPostException();
-        }
-
-        if (!original.getMemberId().equals(memberId)){
+        if (!original.getMemberId().equals(memberId)) {
             throw new UnauthorizedReplyAccessException();
         }
-
         if (requestDto.getContent() == null || requestDto.getContent().trim().isEmpty()) {
-            throw new InvalidPostException("댓글 내용은 필수입니다.");
+            throw new InvalidReplyException("댓글 내용을 입력해주세요.");
         }
 
-        Reply reply = new Reply(
+        Reply updateReply = new Reply(
                 original.getId(),
                 original.getPostId(),
-                original.getMemberId(),
+                memberId,
                 requestDto.getContent(),
-                original.getCreatedAt()
+                original.getCreatedAt(),
+                LocalDateTime.now() // 수정 시간 갱신
         );
-
-        replyRepository.update(reply);
+        replyRepository.update(updateReply);
     }
 
-    public void deleteReply(Long replyId, Long memberId){
-        Reply original =  replyRepository.findById(replyId);
-        if (original == null){
-            throw new ReplyNotFoundException();
-        }
-
-        if (!original.getMemberId().equals(memberId)){
+    // 댓글 삭제
+    public void deleteReply(Long replyId, Long memberId) {
+        Reply original = getReply(replyId);
+        if (!original.getMemberId().equals(memberId)) {
             throw new UnauthorizedReplyAccessException();
         }
         replyRepository.delete(replyId);

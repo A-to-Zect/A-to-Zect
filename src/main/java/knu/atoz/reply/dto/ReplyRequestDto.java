@@ -1,13 +1,14 @@
 package knu.atoz.reply.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ReplyRequestDto {
-    private final String content;
-
-    public ReplyRequestDto(String content) {
-        this.content = content;
-    }
-
-    public String getContent() {
-        return content;
-    }
+    private String content;
 }

@@ -1,200 +1,60 @@
 package knu.atoz.reply;
 
-
-import knu.atoz.member.MemberService;
+import jakarta.servlet.http.HttpSession;
+import knu.atoz.member.Member;
 import knu.atoz.reply.dto.ReplyRequestDto;
-import knu.atoz.reply.dto.ReplyResponseDto;
-import knu.atoz.utils.InputUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Scanner;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
+@Controller
+@RequestMapping("/projects/{projectId}/posts/{postId}/replies")
+@RequiredArgsConstructor
 public class ReplyController {
 
-    private final MemberService memberService;
     private final ReplyService replyService;
-    private final Scanner scanner;
 
-    public ReplyController(
-            MemberService memberService,
-            ReplyService replyService,
-            Scanner scanner
-    ) {
-        this.memberService = memberService;
-        this.replyService = replyService;
-        this.scanner = scanner;
-    }
-
-    public void showReplyMenu(Long postId) {
-        while (true) {
-            printMenuHeader(postId);
-
-            if (!memberService.isLoggedIn()) {
-                System.out.println("로그인해야합니다.");
-                return;
-            }
-
-            String choice = getMenuChoice();
-
-            switch (choice) {
-                case "1":
-                    handleShowAllReplies(postId);
-                    break;
-
-                case "2":
-                    handleShowMyReplies(postId);
-                    break;
-
-                case "3":
-                    handleCreateReply(postId);
-                    break;
-
-                case "4":
-                    handleUpdateReply(postId);
-                    break;
-
-                case "5":
-                    handleDeleteReply(postId);
-                    break;
-
-                case "b":
-                    return;
-
-                default:
-                    System.out.println("잘못된 입력입니다.");
-            }
-        }
-    }
-
-    private void printMenuHeader(Long postId) {
-        System.out.println("\n---------- 댓글 기능 ----------");
-        System.out.println("현재 로그인: " + memberService.getCurrentUser().getEmail());
-        System.out.println("현재 게시물: " + postId);
-        System.out.println("1. 전체 댓글 보기");
-        System.out.println("2. 내가 쓴 댓글 보기");
-        System.out.println("3. 댓글 작성");
-        System.out.println("4. 댓글 수정");
-        System.out.println("5. 댓글 삭제");
-        System.out.println("b. 뒤로 가기");
-    }
-
-    private String getMenuChoice() {
-        System.out.print("메뉴를 선택하세요: ");
-        return scanner.nextLine();
-    }
-
-    private void handleShowAllReplies(Long postId) {
-        try {
-            showReplyList(replyService.getReplyList(postId));
-        } catch (Exception e) {
-            printError(e);
-        }
-        pause();
-    }
-
-    private void handleShowMyReplies(Long postId) {
-        try {
-            showMyReplyList(replyService.getMyReplyList(
-                    postId,
-                    memberService.getCurrentUser().getId()
-            ));
-        } catch (Exception e) {
-            printError(e);
-        }
-        pause();
-    }
-
-    private void handleCreateReply(Long postId) {
-        System.out.println("---------- 댓글 작성 ----------");
+    // 1. 댓글 작성 (POST)
+    @PostMapping
+    public String createReply(@PathVariable Long projectId,
+                              @PathVariable Long postId,
+                              @ModelAttribute ReplyRequestDto dto,
+                              HttpSession session) {
+        Member loginMember = (Member) session.getAttribute("loginMember");
+        if (loginMember == null) return "redirect:/members/login";
 
         try {
-            String content = InputUtil.getInput(scanner, "댓글 내용");
-
-            ReplyRequestDto replyRequestDto = new ReplyRequestDto(content);
-
-            replyService.createReply(postId, memberService.getCurrentUser().getId(), replyRequestDto);
-            System.out.println("댓글 생성 성공!");
-
-        } catch (InputUtil.CancelException e) {
-            System.out.println("\n[!] 댓글 작성이 취소되었습니다.");
+            replyService.createReply(postId, loginMember.getId(), dto);
+            return "redirect:/projects/" + projectId + "/posts/" + postId; // 게시글 상세로 복귀
         } catch (Exception e) {
-            printError(e);
+            return "redirect:/projects/" + projectId + "/posts/" + postId + "?error=" + encode(e.getMessage());
         }
-        pause();
     }
 
-    private void handleUpdateReply(Long postId) {
-        System.out.println("---------- 댓글 수정 ----------");
+    // 2. 댓글 삭제 (POST)
+    @PostMapping("/{replyId}/delete")
+    public String deleteReply(@PathVariable Long projectId,
+                              @PathVariable Long postId,
+                              @PathVariable Long replyId,
+                              HttpSession session) {
+        Member loginMember = (Member) session.getAttribute("loginMember");
+        if (loginMember == null) return "redirect:/members/login";
 
         try {
-            showMyReplyList(replyService.getMyReplyList(
-                    postId,
-                    memberService.getCurrentUser().getId()
-            ));
-
-            Long choiceReplyId = InputUtil.getLong(scanner, "수정할 댓글 ID");
-
-            Reply myReply = replyService.getReply(choiceReplyId);
-
-            String content = InputUtil.getInput(scanner, "수정할 내용 입력");
-
-            ReplyRequestDto replyRequestDto = new ReplyRequestDto(content);
-
-            replyService.updateReply(postId, myReply.getId(), memberService.getCurrentUser().getId(), replyRequestDto);
-            System.out.println("댓글 수정 성공!");
-
-        } catch (InputUtil.CancelException e) {
-            System.out.println("\n[!] 댓글 수정이 취소되었습니다.");
+            replyService.deleteReply(replyId, loginMember.getId());
+            return "redirect:/projects/" + projectId + "/posts/" + postId;
         } catch (Exception e) {
-            printError(e);
+            return "redirect:/projects/" + projectId + "/posts/" + postId + "?error=" + encode(e.getMessage());
         }
-        pause();
     }
 
-    private void handleDeleteReply(Long postId) {
-        System.out.println("---------- 댓글 삭제 ----------");
+    // (댓글 수정은 모달이나 인라인 폼이 필요하지만, 간단히 구현하려면 별도 페이지보다는 삭제 후 다시 쓰는 게 나을 수도 있음.
+    // 여기서는 일단 생략하거나, 필요시 별도 수정 로직 추가 가능)
 
-        try {
-            showMyReplyList(replyService.getMyReplyList(
-                    postId,
-                    memberService.getCurrentUser().getId()
-            ));
-
-            Long choiceReplyId = InputUtil.getLong(scanner, "삭제할 댓글 ID");
-
-            replyService.deleteReply(choiceReplyId, memberService.getCurrentUser().getId());
-            System.out.println("댓글 삭제 성공!");
-
-        } catch (InputUtil.CancelException e) {
-            System.out.println("\n[!] 댓글 삭제가 취소되었습니다.");
-        } catch (Exception e) {
-            printError(e);
-        }
-        pause();
-    }
-
-    private void printError(Exception e) {
-        System.out.println("[오류] " + e.getMessage());
-    }
-
-    private void pause() {
-        System.out.print("\n엔터키를 누르면 댓글 기능으로 돌아갑니다.");
-        scanner.nextLine();
-    }
-
-    private void showReplyList(List<ReplyResponseDto> replyList) {
-        System.out.println("---------- 댓글 목록 (최신순) ----------");
-        for (ReplyResponseDto reply : replyList) {
-            System.out.println("- " + reply.getName() + ": " + reply.getContent());
-        }
-        System.out.println();
-    }
-
-    private void showMyReplyList(List<Reply> replyList) {
-        System.out.println("---------- 내 댓글 목록 ----------");
-        for (Reply reply : replyList) {
-            System.out.println(reply.getId() + ". " + reply.getContent());
-        }
-        System.out.println();
+    private String encode(String text) {
+        return URLEncoder.encode(text, StandardCharsets.UTF_8);
     }
 }

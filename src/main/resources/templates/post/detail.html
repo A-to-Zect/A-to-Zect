@@ -5,51 +5,51 @@
     <title>게시글 보기</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
-        /* 게시글 상세 전용 스타일 */
+        /* --- 게시글 영역 스타일 --- */
         .post-header {
             border-bottom: 1px solid #eee;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
         }
         .post-title {
-            font-size: 24px;
-            font-weight: bold;
+            font-size: 26px;
+            font-weight: 800;
             color: #333;
-            margin: 0 0 10px 0;
+            margin: 0 0 15px 0;
+            line-height: 1.3;
         }
         .post-meta {
-            font-size: 13px;
-            color: #888;
-            display: flex;
-            justify-content: space-between;
-        }
-        .post-content {
-            min-height: 300px;
-            background: #fff;
-            padding: 30px;
-            border: 1px solid #e1e4e8;
-            border-radius: 8px;
-            line-height: 1.8;
-            white-space: pre-wrap; /* 줄바꿈 유지 */
-            color: #444;
-            font-size: 15px;
-        }
-        .btn-container {
-            margin-top: 30px;
+            font-size: 14px;
+            color: #666;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 8px;
         }
-        .author-actions {
-            display: flex;
-            gap: 8px; /* 버튼 사이 간격 */
+        .post-content {
+            min-height: 300px;
+            line-height: 1.8;
+            white-space: pre-wrap; /* 줄바꿈 유지 */
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 40px;
         }
 
-        /* [추가] 버튼 크기 강제 통일 */
+        /* 버튼 크기 강제 통일 (게시글 수정/삭제용) */
+        .btn-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 50px; /* 댓글 영역과 거리 두기 */
+        }
+        .author-actions { display: flex; gap: 8px; }
+
         .btn-fixed {
-            height: 38px !important;        /* 높이 고정 */
-            line-height: 36px !important;   /* 텍스트 수직 정렬 (border 고려 -2px) */
-            padding: 0 18px !important;     /* 좌우 여백 */
+            height: 40px !important;
+            line-height: 38px !important;
+            padding: 0 20px !important;
             font-size: 14px !important;
             display: inline-flex !important;
             align-items: center;
@@ -57,7 +57,60 @@
             box-sizing: border-box !important;
             margin: 0 !important;
             text-decoration: none !important;
+            border-radius: 6px !important;
         }
+
+        /* --- 댓글 영역 스타일 --- */
+        .reply-section {
+            border-top: 2px solid #333;
+            padding-top: 30px;
+        }
+        .reply-header {
+            font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #333;
+        }
+
+        /* 개별 댓글 카드 */
+        .reply-item {
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            padding: 20px 10px;
+        }
+        .reply-item:last-child { border-bottom: none; }
+
+        .reply-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .reply-author { font-weight: bold; font-size: 15px; color: #333; }
+        .reply-date { font-size: 12px; color: #999; margin-left: 10px; }
+        .reply-content {
+            font-size: 14px; color: #555; line-height: 1.6; white-space: pre-wrap;
+        }
+
+        /* 댓글 삭제 버튼 (작게) */
+        .btn-reply-delete {
+            background: none; border: none; color: #dc3545;
+            font-size: 12px; cursor: pointer; padding: 0;
+            text-decoration: underline;
+        }
+        .btn-reply-delete:hover { font-weight: bold; }
+
+        /* 댓글 작성 폼 */
+        .reply-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            border: 1px solid #eee;
+        }
+        .reply-textarea {
+            width: 100%; height: 80px; border: 1px solid #ddd;
+            border-radius: 6px; padding: 10px; resize: none; font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .reply-textarea:focus { border-color: #007bff; outline: none; }
     </style>
 </head>
 <body>
@@ -67,13 +120,14 @@
     <div class="post-header">
         <h1 class="post-title" th:text="${post.title}">게시글 제목</h1>
         <div class="post-meta">
-            <span>
-                작성자: <strong style="color: #333;" th:text="${authorName}">홍길동</strong>
-            </span>
+            <div>
+                <span style="color: #888;">작성자</span>
+                <strong style="color: #333; margin-left: 5px;" th:text="${authorName}">홍길동</strong>
+            </div>
 
-            <span th:text="|수정일: ${#temporals.format(post.modifiedAt, 'yyyy-MM-dd HH:mm')}|">
-                수정일: 2025-11-25 19:21
-            </span>
+            <div style="color: #888;">
+                <span th:text="${#temporals.format(post.modifiedAt, 'yyyy-MM-dd HH:mm')}">2025-11-25 19:21</span>
+            </div>
         </div>
     </div>
 
@@ -85,15 +139,58 @@
         <a th:href="@{|/projects/${project.id}/posts|}" class="btn btn-secondary btn-fixed">목록으로</a>
 
         <div class="author-actions" th:if="${post.memberId == loginMemberId}">
-
             <a th:href="@{|/projects/${project.id}/posts/${post.id}/edit|}"
                class="btn btn-outline btn-fixed">수정</a>
 
             <form th:action="@{|/projects/${project.id}/posts/${post.id}/delete|}" method="post" style="margin:0;">
                 <button type="submit" class="btn btn-danger btn-fixed"
-                        onclick="return confirm('정말 삭제하시겠습니까?');">
+                        onclick="return confirm('정말 게시글을 삭제하시겠습니까?');">
                     삭제
                 </button>
+            </form>
+        </div>
+    </div>
+
+
+    <div class="reply-section">
+        <div class="reply-header">
+            💬 댓글 <span style="color: #007bff;" th:text="${replies.size()}">2</span>
+        </div>
+
+        <div class="reply-list">
+            <div th:if="${replies.isEmpty()}" style="text-align: center; padding: 30px; color: #999; background: #fff; border-bottom: 1px solid #eee;">
+                첫 번째 댓글을 남겨보세요!
+            </div>
+
+            <div th:each="reply : ${replies}" class="reply-item">
+                <div class="reply-meta">
+                    <div>
+                        <span class="reply-author" th:text="${reply.name}">작성자명</span>
+                        <span class="reply-date" th:text="${#temporals.format(reply.modifiedAt, 'yyyy-MM-dd HH:mm')}">
+                            2025-11-25 20:00
+                        </span>
+                    </div>
+
+                    <form th:if="${reply.memberId == loginMemberId}"
+                          th:action="@{|/projects/${project.id}/posts/${post.id}/replies/${reply.id}/delete|}"
+                          method="post" style="margin: 0;">
+                        <button type="submit" class="btn-reply-delete"
+                                onclick="return confirm('댓글을 삭제하시겠습니까?');">삭제</button>
+                    </form>
+                </div>
+
+                <div class="reply-content" th:text="${reply.content}">댓글 내용...</div>
+            </div>
+        </div>
+
+        <div class="reply-form">
+            <form th:action="@{|/projects/${project.id}/posts/${post.id}/replies|}" method="post" th:object="${replyDto}">
+                <textarea class="reply-textarea" th:field="*{content}" placeholder="댓글을 입력하세요..." required></textarea>
+                <div style="text-align: right;">
+                    <button type="submit" class="btn btn-primary btn-fixed" style="height: 36px !important; padding: 0 15px !important; font-size: 13px !important;">
+                        댓글 등록
+                    </button>
+                </div>
             </form>
         </div>
     </div>

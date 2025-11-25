@@ -1,25 +1,20 @@
 package knu.atoz.reply.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ReplyResponseDto {
-    Long id;
-    String content;
-    String name;
-
-    public ReplyResponseDto(Long id, String content, String name) {
-        this.id = id;
-        this.content = content;
-        this.name = name;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getContent() {
-        return content;
-    }
+    private Long id;
+    private Long memberId;
+    private String content;
+    private LocalDateTime modifiedAt;
+    private String name;
 }

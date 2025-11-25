@@ -2,17 +2,19 @@ package knu.atoz.reply;
 
 import knu.atoz.reply.dto.ReplyResponseDto;
 import knu.atoz.utils.Azconnection;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Repository
 public class ReplyRepository {
 
     public List<ReplyResponseDto> findAllByPostId(Long postId){
         List<ReplyResponseDto> replyResponseList = new ArrayList<>();
-        String sql = "SELECT r.id, r.content, m.name FROM Reply r JOIN Member m ON r.member_id = m.id WHERE r.post_id = ? ORDER BY r.modified_at DESC";
+        String sql = "SELECT r.id, r.member_id, r.content, r.modified_at, m.name FROM Reply r JOIN Member m ON r.member_id = m.id WHERE r.post_id = ? ORDER BY r.modified_at DESC";
 
         try (Connection conn = Azconnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -22,9 +24,11 @@ public class ReplyRepository {
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     ReplyResponseDto reply = new ReplyResponseDto(
-                            rs.getLong(1),
-                            rs.getString(2),
-                            rs.getString(3)
+                            rs.getLong("id"),
+                            rs.getLong("member_id"),
+                            rs.getString("content"),
+                            rs.getObject("modified_at", LocalDateTime.class),
+                            rs.getString("name")
                     );
                     replyResponseList.add(reply);
                 }

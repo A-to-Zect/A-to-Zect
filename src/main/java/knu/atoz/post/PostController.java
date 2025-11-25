@@ -7,6 +7,9 @@ import knu.atoz.participant.ParticipantService;
 import knu.atoz.post.dto.PostRequestDto;
 import knu.atoz.project.Project;
 import knu.atoz.project.ProjectService;
+import knu.atoz.reply.ReplyService;
+import knu.atoz.reply.dto.ReplyRequestDto;
+import knu.atoz.reply.dto.ReplyResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,6 +28,7 @@ public class PostController {
     private final ProjectService projectService;
     private final ParticipantService participantService;
     private final MemberService memberService;
+    private final ReplyService replyService;
 
     // 1. 게시글 목록
     @GetMapping
@@ -63,13 +67,19 @@ public class PostController {
         try {
             Post post = postService.getPost(postId);
             Project project = projectService.getProject(projectId);
+            List<ReplyResponseDto> replies = replyService.getReplyList(postId);
 
+            // [추가] 댓글 작성용 빈 객체
+            model.addAttribute("replyDto", new ReplyRequestDto());
             model.addAttribute("post", post);
             model.addAttribute("project", project);
             model.addAttribute("loginMemberId", loginMember.getId());
 
             String authorName = memberService.getMemberName(post.getMemberId());
             model.addAttribute("authorName", authorName);
+
+            model.addAttribute("replies", replies);
+
 
             return "post/detail";
 
