@@ -7,6 +7,7 @@ import knu.atoz.link.exception.LinkNotFoundException;
 
 import java.util.List;
 
+@Service
 public class LinkService {
 
     private final LinkRepository linkRepository;
