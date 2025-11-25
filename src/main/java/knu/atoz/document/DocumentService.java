@@ -146,4 +146,27 @@ public class DocumentService {
         return "/uploads/" + fileName;
     }
 
+    public File getPhysicalFile(Long documentId) {
+        Document document = documentRepository.findById(documentId);
+        if (document == null) {
+            throw new DocumentNotFoundException();
+        }
+
+        // DB에 저장된 경로: /uploads/uuid_filename.ext
+        // 실제 저장 경로: System.getProperty("user.dir") + /uploads/uuid_filename.ext
+
+        // 1. "/uploads/" 문자열 제거하여 순수 파일명만 추출
+        String path = document.getLocation();
+        String fileName = path.substring(path.lastIndexOf("/") + 1);
+
+        // 2. 전체 경로 조립
+        String projectPath = System.getProperty("user.dir") + "/uploads";
+        File file = new File(projectPath, fileName);
+
+        if (!file.exists()) {
+            throw new DocumentFileNotExistException();
+        }
+
+        return file;
+    }
 }

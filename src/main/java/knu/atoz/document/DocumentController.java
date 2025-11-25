@@ -7,10 +7,17 @@ import knu.atoz.participant.ParticipantService;
 import knu.atoz.project.Project;
 import knu.atoz.project.ProjectService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriUtils;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 
+import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -190,5 +197,43 @@ public class DocumentController {
 
     private String encode(String text) {
         return URLEncoder.encode(text, StandardCharsets.UTF_8);
+    }
+
+    @GetMapping("/{docId}/download")
+    public ResponseEntity<Resource> downloadFile(@PathVariable Long projectId,
+                                                 @PathVariable Long docId,
+                                                 HttpSession session) throws MalformedURLException {
+        Member loginMember = (Member) session.getAttribute("loginMember");
+        if (loginMember == null) {
+            // 로그인 안 했으면 다운로드 불가 (ResponseEntity로 에러 반환)
+            return ResponseEntity.status(401).build();
+        }
+
+        // 권한 체크 (팀원만 다운로드 가능)
+        if (!isTeamMember(projectId, loginMember.getId())) {
+            return ResponseEntity.status(403).build();
+        }
+
+        // 1. 파일 가져오기
+        Document document = documentService.getDocument(docId);
+        File file = documentService.getPhysicalFile(docId);
+
+        // 2. Resource로 변환
+        Resource resource = new UrlResource(file.toURI());
+
+        // 3. 다운로드 시 보여질 파일명 추출 (UUID 제거)
+        // 엔티티에 만들어둔 getOriginalFileName() 재사용
+        String originalFileName = document.getLocation();
+        String fileName = originalFileName.substring(originalFileName.lastIndexOf("/") + 1);
+
+        // 4. 한글 파일명 깨짐 방지 인코딩
+        String encodedUploadFileName = UriUtils.encode(fileName, StandardCharsets.UTF_8);
+
+        // 5. 헤더 설정 및 응답 (attachment; filename="...")
+        String contentDisposition = "attachment; filename=\"" + encodedUploadFileName + "\"";
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
+                .body(resource);
     }
 }
