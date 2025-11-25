@@ -1,19 +1,15 @@
 package knu.atoz.document.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class DocumentRequestDto {
     String title;
     String location;
-
-    public DocumentRequestDto(String title, String location) {
-        this.title = title;
-        this.location = location;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getLocation() {
-        return location;
-    }
 }
