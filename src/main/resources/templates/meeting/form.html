@@ -4,6 +4,26 @@
     <meta charset="UTF-8">
     <title th:text="${isNew} ? '회의록 작성' : '회의록 수정'">회의록 관리</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .field-error {
+            border-color: #dc3545 !important;
+            margin-bottom: 0 !important;
+        }
+        .field-error-msg {
+            color: #dc3545;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 3px;
+            margin-bottom: 15px;
+        }
+        /* 시간 관련 에러는 입력창들 위에 띄움 */
+        .global-error-text {
+            color: #dc3545;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+    </style>
 </head>
 <body>
 
@@ -16,34 +36,56 @@
     </div>
     <hr>
 
-    <div th:if="${error}" class="error-msg" th:text="${error}"></div>
+    <div th:if="${error}" class="error-msg" th:text="${error}" style="color: red; margin-bottom: 10px;"></div>
 
     <form th:action="${isNew} ? @{|/projects/${project.id}/meetings/new|} : @{|/projects/${project.id}/meetings/${meeting.id}/edit|}"
           method="post"
           th:object="${meetingDto}">
 
-        <div>
+        <div style="margin-bottom: 5px;">
             <label for="title">회의 제목</label>
-            <input type="text" id="title" th:field="*{title}" placeholder="예: 1차 아이디어 회의" required>
+            <input type="text" id="title" th:field="*{title}"
+                   class="form-control"
+                   th:errorclass="field-error"
+                   placeholder="예: 1차 아이디어 회의"
+                   style="margin-bottom: 15px;">
+
+            <div class="field-error-msg" th:errors="*{title}">제목 에러</div>
         </div>
 
-        <div style="display: flex; gap: 20px; margin-bottom: 20px;">
-            <div style="flex: 1;">
-                <label for="startTime">시작 시간</label>
-                <input type="datetime-local" id="startTime" th:field="*{startTime}">
+        <div style="margin-bottom: 20px;">
+            <div th:if="${#fields.hasGlobalErrors()}" class="global-error-text">
+                <span th:each="err : ${#fields.globalErrors()}" th:text="${err}">시간 에러 메시지</span>
             </div>
-            <div style="flex: 1;">
-                <label for="endTime">종료 시간</label>
-                <input type="datetime-local" id="endTime" th:field="*{endTime}">
-            </div>
-        </div>
-        <p style="font-size: 12px; color: #888; margin-top: -10px; margin-bottom: 20px;">
-            * 시간은 비워두거나, 둘 다 입력해야 합니다. 종료 시간은 시작 시간보다 늦어야 합니다.
-        </p>
 
-        <div>
+            <div style="display: flex; gap: 20px;">
+                <div style="flex: 1;">
+                    <label for="startTime">시작 시간</label>
+                    <input type="datetime-local" id="startTime" th:field="*{startTime}"
+                           class="form-control"
+                           th:classappend="${#fields.hasGlobalErrors()} ? 'field-error' : ''">
+                </div>
+                <div style="flex: 1;">
+                    <label for="endTime">종료 시간</label>
+                    <input type="datetime-local" id="endTime" th:field="*{endTime}"
+                           class="form-control"
+                           th:classappend="${#fields.hasGlobalErrors()} ? 'field-error' : ''">
+                </div>
+            </div>
+            <p style="font-size: 12px; color: #888; margin-top: 5px;">
+                * 시간은 비워두거나, 둘 다 입력해야 합니다. 종료 시간은 시작 시간보다 늦어야 합니다.
+            </p>
+        </div>
+
+        <div style="margin-bottom: 5px;">
             <label for="description">회의 내용</label>
-            <textarea id="description" th:field="*{description}" rows="10" placeholder="회의 내용을 자유롭게 작성하세요..." required></textarea>
+            <textarea id="description" th:field="*{description}" rows="10"
+                      class="form-control"
+                      th:errorclass="field-error"
+                      placeholder="회의 내용을 자유롭게 작성하세요..."
+                      style="margin-bottom: 15px;"></textarea>
+
+            <div class="field-error-msg" th:errors="*{description}">내용 에러</div>
         </div>
 
         <div style="margin-top: 30px;">

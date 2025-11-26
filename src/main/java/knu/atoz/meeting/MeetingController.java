@@ -1,6 +1,7 @@
 package knu.atoz.meeting;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import knu.atoz.meeting.dto.MeetingRequestDto;
 import knu.atoz.member.Member;
 import knu.atoz.participant.ParticipantService;
@@ -9,6 +10,7 @@ import knu.atoz.project.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URLEncoder;
@@ -24,7 +26,6 @@ public class MeetingController {
     private final ProjectService projectService;
     private final ParticipantService participantService;
 
-    // 1. 회의록 목록 조회
     @GetMapping
     public String listMeetings(@PathVariable Long projectId,
                                HttpSession session,
@@ -50,7 +51,6 @@ public class MeetingController {
         }
     }
 
-    // 2. 작성 폼
     @GetMapping("/new")
     public String showCreateForm(@PathVariable Long projectId,
                                  HttpSession session,
@@ -71,14 +71,20 @@ public class MeetingController {
         return "meeting/form";
     }
 
-    // 3. 작성 처리
     @PostMapping("/new")
     public String createMeeting(@PathVariable Long projectId,
-                                @ModelAttribute MeetingRequestDto dto,
+                                @Valid @ModelAttribute("meetingDto") MeetingRequestDto dto,
+                                BindingResult bindingResult,
                                 HttpSession session,
                                 Model model) {
         Member loginMember = getLoginMember(session);
         if (loginMember == null) return "redirect:/members/login";
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("project", projectService.getProject(projectId));
+            model.addAttribute("isNew", true);
+            return "meeting/form";
+        }
 
         try {
             meetingService.createMeeting(projectId, dto);
@@ -86,7 +92,6 @@ public class MeetingController {
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("project", projectService.getProject(projectId));
-            model.addAttribute("meetingDto", dto);
             model.addAttribute("isNew", true);
             return "meeting/form";
         }
@@ -128,15 +133,25 @@ public class MeetingController {
         }
     }
 
-    // 5. 수정 처리
     @PostMapping("/{meetingId}/edit")
     public String updateMeeting(@PathVariable Long projectId,
                                 @PathVariable Long meetingId,
-                                @ModelAttribute MeetingRequestDto dto,
+                                @Valid @ModelAttribute("meetingDto") MeetingRequestDto dto,
+                                BindingResult bindingResult,
                                 HttpSession session,
                                 Model model) {
         Member loginMember = getLoginMember(session);
         if (loginMember == null) return "redirect:/members/login";
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("project", projectService.getProject(projectId));
+            model.addAttribute("isNew", false);
+            try {
+                model.addAttribute("meeting", meetingService.getMeeting(meetingId));
+            } catch (Exception ignored) {}
+
+            return "meeting/form";
+        }
 
         try {
             meetingService.updateMeeting(meetingId, projectId, dto);
@@ -144,13 +159,16 @@ public class MeetingController {
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("project", projectService.getProject(projectId));
-            model.addAttribute("meetingDto", dto);
             model.addAttribute("isNew", false);
+
+            try {
+                model.addAttribute("meeting", meetingService.getMeeting(meetingId));
+            } catch (Exception ignored) {}
+
             return "meeting/form";
         }
     }
 
-    // 6. 삭제 처리
     @PostMapping("/{meetingId}/delete")
     public String deleteMeeting(@PathVariable Long projectId,
                                 @PathVariable Long meetingId,
