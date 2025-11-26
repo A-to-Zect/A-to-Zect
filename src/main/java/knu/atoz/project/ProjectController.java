@@ -1,6 +1,7 @@
 package knu.atoz.project;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import knu.atoz.mbti.project.ProjectMbtiService;
 import knu.atoz.member.Member;
 import knu.atoz.participant.ParticipantService;
@@ -14,6 +15,7 @@ import knu.atoz.techspec.project.ProjectTechspecService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URLEncoder;
@@ -32,9 +34,9 @@ public class ProjectController {
     private final ProjectMbtiService projectMbtiService;
 
     @GetMapping("")
-    public String showAllProjects(@RequestParam(value = "keyword", required = false) String keyword, 
+    public String showAllProjects(@RequestParam(value = "keyword", required = false) String keyword,
                                   Model model) {
-        
+
         List<Project> projectList = projectService.searchProjects(keyword);
 
         model.addAttribute("projects", projectList);
@@ -43,7 +45,7 @@ public class ProjectController {
         return "project/list";
     }
 
-    
+
     @GetMapping("/create")
     public String showCreateForm(HttpSession session, Model model) {
         Member loginMember = (Member) session.getAttribute("loginMember");
@@ -55,9 +57,10 @@ public class ProjectController {
         return "project/create";
     }
 
-    
+
     @PostMapping("/create")
-    public String createProject(@ModelAttribute ProjectCreateRequestDto dto,
+    public String createProject(@Valid @ModelAttribute("projectDto") ProjectCreateRequestDto dto,
+                                BindingResult bindingResult,
                                 HttpSession session,
                                 Model model) {
         Member loginMember = (Member) session.getAttribute("loginMember");
@@ -65,20 +68,23 @@ public class ProjectController {
             return "redirect:/members/login";
         }
 
+        if (bindingResult.hasErrors()) {
+            return "project/create";
+        }
+
         try {
             dto.setMemberId(loginMember.getId());
             projectService.createProject(dto);
 
-            return "redirect:/"; 
+            return "redirect:/";
 
         } catch (ProjectException | TechspecException e) {
             model.addAttribute("error", e.getMessage());
-            model.addAttribute("projectDto", dto); 
             return "project/create";
         }
     }
 
-    
+
     @GetMapping("/my")
     public String showMyProjects(HttpSession session, Model model) {
         Member loginMember = (Member) session.getAttribute("loginMember");
@@ -86,7 +92,7 @@ public class ProjectController {
             return "redirect:/members/login";
         }
 
-        
+
         List<MyProjectResponseDto> myProjects = projectService.getMyProjectListAndRole(loginMember.getId());
         model.addAttribute("projects", myProjects);
 
@@ -94,7 +100,7 @@ public class ProjectController {
     }
 
 
-    
+
     @PostMapping("/{projectId}/delete")
     public String deleteProject(@PathVariable Long projectId, HttpSession session) {
         Member loginMember = (Member) session.getAttribute("loginMember");
@@ -105,7 +111,7 @@ public class ProjectController {
         try {
             projectService.deleteProject(projectId, loginMember.getId());
         } catch (Exception e) {
-            
+
         }
 
         return "redirect:/projects/my";
@@ -171,12 +177,18 @@ public class ProjectController {
 
     @PostMapping("/{projectId}/edit")
     public String updateProject(@PathVariable Long projectId,
-                                @ModelAttribute ProjectUpdateRequestDto dto,
+                                @Valid @ModelAttribute("updateDto") ProjectUpdateRequestDto dto,
+                                BindingResult bindingResult,
                                 HttpSession session,
                                 Model model) {
         Member loginMember = (Member) session.getAttribute("loginMember");
         if (loginMember == null) {
             return "redirect:/members/login";
+        }
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("projectId", projectId);
+            return "project/edit";
         }
 
         try {
@@ -186,7 +198,6 @@ public class ProjectController {
 
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
-            model.addAttribute("updateDto", dto); 
             model.addAttribute("projectId", projectId);
             return "project/edit";
         }

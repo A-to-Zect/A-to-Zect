@@ -6,7 +6,6 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 
     <style>
-        /* 기존 CSS 유지 */
         .mbti-section { display: flex; justify-content: space-between; gap: 10px; margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 8px; }
         .mbti-card { flex: 1; background: white; border: 1px solid #ddd; border-radius: 8px; text-align: center; padding: 10px; display: flex; flex-direction: column; gap: 5px; }
         .mbti-title { font-size: 12px; color: #666; margin-bottom: 5px; font-weight: bold; }
@@ -20,6 +19,9 @@
         .remove-tag-btn { cursor: pointer; color: #4f46e5; font-weight: bold; border: none; background: none; padding: 0; font-size: 16px; line-height: 1; }
         .remove-tag-btn:hover { color: #dc3545; }
         .input-group { display: flex; gap: 10px; }
+
+        .field-error { border-color: #dc3545 !important; margin-bottom: 0 !important; }
+        .field-error-msg { color: #dc3545; font-size: 12px; font-weight: bold; margin-top: 3px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -31,24 +33,31 @@
     </div>
     <hr>
 
-    <div th:if="${error}" class="error-msg" th:text="${error}"></div>
+    <div th:if="${error}" class="error-msg" th:text="${error}" style="color: red; margin-bottom: 20px;"></div>
 
     <form action="/projects/create" method="post" th:object="${projectDto}" id="createForm">
 
         <h3>1. 기본 정보</h3>
-        <div>
+        <div style="margin-bottom: 5px;">
             <label>프로젝트 제목</label>
-            <input type="text" th:field="*{title}" placeholder="제목을 입력하세요">
-        </div>
-        <div>
-            <label>설명</label>
-            <textarea th:field="*{description}" placeholder="프로젝트 설명을 입력하세요"></textarea>
+            <input type="text" th:field="*{title}" placeholder="제목을 입력하세요"
+                   class="form-control" th:errorclass="field-error" style="margin-bottom: 15px;">
+            <div class="field-error-msg" th:errors="*{title}">제목 에러</div>
         </div>
 
-        <div>
+        <div style="margin-bottom: 5px;">
+            <label>설명</label>
+            <textarea th:field="*{description}" placeholder="프로젝트 설명을 입력하세요"
+                      class="form-control" th:errorclass="field-error" style="margin-bottom: 15px;"></textarea>
+            <div class="field-error-msg" th:errors="*{description}">설명 에러</div>
+        </div>
+
+        <div style="margin-bottom: 5px;">
             <label>최대 모집 인원 (본인 포함)</label>
-            <input type="number" th:field="*{maxCount}" min="2" max="20" value="4" placeholder="예: 4명">
-            <p style="font-size: 12px; color: #888; margin-top: -10px;">* 최소 2명부터 최대 20명까지 설정 가능합니다.</p>
+            <input type="number" th:field="*{maxCount}" min="2" max="20" placeholder="예: 4명"
+                   class="form-control" th:errorclass="field-error" style="margin-bottom: 15px;">
+            <div class="field-error-msg" th:errors="*{maxCount}">인원 에러</div>
+            <p style="font-size: 12px; color: #888; margin-top: 5px;">* 최소 2명부터 최대 20명까지 설정 가능합니다.</p>
         </div>
 
         <hr>
@@ -65,10 +74,20 @@
             </div>
 
             <div id="tagDisplayArea" class="tag-container">
-                <span style="color: #ccc; font-size: 14px;" id="placeholder-text">추가된 스택이 없습니다.</span>
+                <th:block th:each="tech : *{techSpecs}">
+                    <div class="tech-tag" th:text="${tech} + ' '">
+                        <span class="remove-tag-btn" th:onclick="|removeTag(this, '${tech}')|">&times;</span>
+                    </div>
+                </th:block>
+                <span style="color: #ccc; font-size: 14px;" id="placeholder-text"
+                      th:if="${projectDto.techSpecs == null || projectDto.techSpecs.empty}">추가된 스택이 없습니다.</span>
             </div>
 
-            <div id="hiddenInputsContainer"></div>
+            <div id="hiddenInputsContainer">
+                <th:block th:each="tech : *{techSpecs}">
+                    <input type="hidden" name="techSpecs" th:value="${tech}" th:id="'hidden-' + ${tech}">
+                </th:block>
+            </div>
         </div>
 
         <hr>
@@ -82,29 +101,29 @@
             <div class="mbti-card">
                 <span class="mbti-title">에너지 방향</span>
                 <div class="radio-group">
-                    <input type="radio" id="e" name="mbtiMap[1]" value="E" checked><label for="e">E</label>
-                    <input type="radio" id="i" name="mbtiMap[1]" value="I"><label for="i">I</label>
+                    <input type="radio" id="e" name="mbtiMap[1]" value="E" th:checked="${projectDto.mbtiMap != null && projectDto.mbtiMap[1L] == 'E' ? true : (projectDto.mbtiMap == null ? true : false)}"><label for="e">E</label>
+                    <input type="radio" id="i" name="mbtiMap[1]" value="I" th:checked="${projectDto.mbtiMap != null && projectDto.mbtiMap[1L] == 'I'}"><label for="i">I</label>
                 </div>
             </div>
             <div class="mbti-card">
                 <span class="mbti-title">인식 방식</span>
                 <div class="radio-group">
-                    <input type="radio" id="s" name="mbtiMap[2]" value="S" checked><label for="s">S</label>
-                    <input type="radio" id="n" name="mbtiMap[2]" value="N"><label for="n">N</label>
+                    <input type="radio" id="s" name="mbtiMap[2]" value="S" th:checked="${projectDto.mbtiMap != null && projectDto.mbtiMap[2L] == 'S' ? true : (projectDto.mbtiMap == null ? true : false)}"><label for="s">S</label>
+                    <input type="radio" id="n" name="mbtiMap[2]" value="N" th:checked="${projectDto.mbtiMap != null && projectDto.mbtiMap[2L] == 'N'}"><label for="n">N</label>
                 </div>
             </div>
             <div class="mbti-card">
                 <span class="mbti-title">판단 방식</span>
                 <div class="radio-group">
-                    <input type="radio" id="t" name="mbtiMap[3]" value="T" checked><label for="t">T</label>
-                    <input type="radio" id="f" name="mbtiMap[3]" value="F"><label for="f">F</label>
+                    <input type="radio" id="t" name="mbtiMap[3]" value="T" th:checked="${projectDto.mbtiMap != null && projectDto.mbtiMap[3L] == 'T' ? true : (projectDto.mbtiMap == null ? true : false)}"><label for="t">T</label>
+                    <input type="radio" id="f" name="mbtiMap[3]" value="F" th:checked="${projectDto.mbtiMap != null && projectDto.mbtiMap[3L] == 'F'}"><label for="f">F</label>
                 </div>
             </div>
             <div class="mbti-card">
                 <span class="mbti-title">생활 양식</span>
                 <div class="radio-group">
-                    <input type="radio" id="j" name="mbtiMap[4]" value="J" checked><label for="j">J</label>
-                    <input type="radio" id="p" name="mbtiMap[4]" value="P"><label for="p">P</label>
+                    <input type="radio" id="j" name="mbtiMap[4]" value="J" th:checked="${projectDto.mbtiMap != null && projectDto.mbtiMap[4L] == 'J' ? true : (projectDto.mbtiMap == null ? true : false)}"><label for="j">J</label>
+                    <input type="radio" id="p" name="mbtiMap[4]" value="P" th:checked="${projectDto.mbtiMap != null && projectDto.mbtiMap[4L] == 'P'}"><label for="p">P</label>
                 </div>
             </div>
         </div>
