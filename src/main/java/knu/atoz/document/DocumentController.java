@@ -1,20 +1,22 @@
 package knu.atoz.document;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import knu.atoz.document.dto.DocumentRequestDto;
 import knu.atoz.member.Member;
 import knu.atoz.participant.ParticipantService;
 import knu.atoz.project.Project;
 import knu.atoz.project.ProjectService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriUtils;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -78,20 +80,29 @@ public class DocumentController {
 
     @PostMapping("/new")
     public String createDocument(@PathVariable Long projectId,
-                                 @ModelAttribute DocumentRequestDto dto,
+                                 @Valid @ModelAttribute("documentDto") DocumentRequestDto dto,
+                                 BindingResult bindingResult,
                                  HttpSession session,
                                  Model model) {
+
         Member loginMember = getLoginMember(session);
-        if (loginMember == null) return "redirect:/members/login";
+        if (loginMember == null) {
+            return "redirect:/members/login";
+        }
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("project", projectService.getProject(projectId));
+            model.addAttribute("isNew", true);
+
+            return "document/form";
+        }
 
         try {
             documentService.createDocument(projectId, dto);
             return "redirect:/projects/" + projectId + "/documents";
         } catch (Exception e) {
-
             model.addAttribute("error", e.getMessage());
             model.addAttribute("project", projectService.getProject(projectId));
-            model.addAttribute("documentDto", dto);
             model.addAttribute("isNew", true);
             return "document/form";
         }
@@ -133,11 +144,26 @@ public class DocumentController {
     @PostMapping("/{docId}/edit")
     public String updateDocument(@PathVariable Long projectId,
                                  @PathVariable Long docId,
-                                 @ModelAttribute DocumentRequestDto dto,
+                                 @Valid @ModelAttribute("documentDto") DocumentRequestDto dto,
+                                 BindingResult bindingResult,
                                  HttpSession session,
                                  Model model) {
+
         Member loginMember = getLoginMember(session);
-        if (loginMember == null) return "redirect:/members/login";
+        if (loginMember == null) {
+            return "redirect:/members/login";
+        }
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("project", projectService.getProject(projectId));
+            model.addAttribute("isNew", false);
+
+            try {
+                model.addAttribute("document", documentService.getDocument(docId));
+            } catch (Exception ignored) {}
+
+            return "document/form";
+        }
 
         try {
             documentService.updateDocument(docId, projectId, dto);
@@ -145,13 +171,12 @@ public class DocumentController {
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("project", projectService.getProject(projectId));
+            model.addAttribute("isNew", false);
 
             try {
                 model.addAttribute("document", documentService.getDocument(docId));
             } catch (Exception ignored) {}
 
-            model.addAttribute("documentDto", dto);
-            model.addAttribute("isNew", false);
             return "document/form";
         }
     }
