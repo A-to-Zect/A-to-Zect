@@ -32,12 +32,13 @@ public class ProjectController {
     private final ProjectMbtiService projectMbtiService;
 
     @GetMapping("")
-    public String showAllProjects(Model model) {
-
-        List<Project> projectList = projectService.getAllProjects();
-
+    public String showAllProjects(@RequestParam(value = "keyword", required = false) String keyword, 
+                                  Model model) {
         
+        List<Project> projectList = projectService.searchProjects(keyword);
+
         model.addAttribute("projects", projectList);
+        model.addAttribute("keyword", keyword);
 
         return "project/list";
     }
