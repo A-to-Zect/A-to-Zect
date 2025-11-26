@@ -38,3 +38,6 @@ out/
 
 ### upload file ###
 /uploads
+
+/src/main/resources/application.properties
+.env
