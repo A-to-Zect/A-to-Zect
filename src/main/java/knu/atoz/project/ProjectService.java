@@ -140,6 +140,11 @@ public class ProjectService {
         if (!participantRepository.exists(projectId, memberId)) {
             throw new UnauthorizedProjectAccessException("해당 프로젝트에 대한 수정 권한이 없습니다.");
         }
+        
+        if (requestDto.getMaxCount() < project.getCurrentCount()) {
+            throw new IllegalArgumentException("현재 프로젝트에 속한 멤버의 수(" + project.getCurrentCount() + "명)보다 작게 설정할 수 없습니다.");
+        }
+        
         Project newProject = new Project(
                 projectId,
                 requestDto.getTitle(),
