@@ -31,7 +31,30 @@ public class ParticipantService {
         return participantRepository.findRole(projectId, memberId);
     }
 
-    
+    public void leaveProject(Long projectId, Long memberId) {
+        Connection conn = null;
+        try {
+            conn = Azconnection.getConnection();
+            conn.setAutoCommit(false);
+
+            String role = participantRepository.findRole(projectId, memberId);
+            if ("LEADER".equals(role)) {
+                throw new RuntimeException("프로젝트 리더는 나갈 수 없습니다. (프로젝트 삭제만 가능)");
+            }
+
+            participantRepository.delete(conn, projectId, memberId);
+
+            projectRepository.decrementCurrentCount(conn, projectId);
+
+            conn.commit();
+
+        } catch (Exception e) {
+            try { if (conn != null) conn.rollback(); } catch (SQLException ex) {}
+            throw new RuntimeException("프로젝트 나가기 처리 실패: " + e.getMessage());
+        } finally {
+            try { if (conn != null) { conn.setAutoCommit(true); conn.close(); } } catch (SQLException e) {}
+        }
+    }
     public void applyProject(Long projectId, Long memberId) {
         
         if (participantRepository.exists(projectId, memberId)) {
