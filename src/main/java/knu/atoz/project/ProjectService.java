@@ -9,7 +9,6 @@ import knu.atoz.project.exception.ProjectNotFoundException;
 import knu.atoz.project.exception.UnauthorizedProjectAccessException;
 import knu.atoz.techspec.Techspec;
 import knu.atoz.techspec.TechspecRepository;
-import knu.atoz.techspec.exception.TechspecInvalidException;
 import knu.atoz.techspec.project.ProjectTechspecRepository;
 import knu.atoz.utils.Azconnection;
 import org.springframework.stereotype.Service;
@@ -84,25 +83,18 @@ public class ProjectService {
 
             
             participantRepository.saveLeader(conn, requestDto.getMemberId(), newProject.getId());
-
-            
-            if (requestDto.getTechSpecs() != null) {
                 
-                for (String techName : requestDto.getTechSpecs()) {
-                    Techspec techspec = techspecRepository.findTechspecIdByName(techName);
-                    Long techspecId = null;
-                    if (techspec == null) {
-                        techspecId = techspecRepository.createTechspec(conn, techName);
-                    }
-                    else {
-                        techspecId = techspec.getId();
-                    }
-                    projectTechspecRepository.addProjectTechspec(conn, newProject.getId(), techspecId);
+            for (String techName : requestDto.getTechSpecs()) {
+                Techspec techspec = techspecRepository.findTechspecIdByName(techName);
+                Long techspecId = null;
+                if (techspec == null) {
+                    techspecId = techspecRepository.createTechspec(conn, techName);
                 }
-            } else {
-                throw new TechspecInvalidException("테크스펙은 비어있을 수 없습니다.");
+                else {
+                    techspecId = techspec.getId();
+                }
+                projectTechspecRepository.addProjectTechspec(conn, newProject.getId(), techspecId);
             }
-
             
             if (!requestDto.getMbtiMap().isEmpty()) {
                 

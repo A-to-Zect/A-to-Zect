@@ -26,10 +26,6 @@ public class MemberTechspecService {
     
     public void addTechspec(Long memberId, String techName) {
 
-        if (techName == null || techName.isBlank()) {
-            throw new TechspecInvalidException("스택 이름은 비어 있을 수 없습니다.");
-        }
-
         Connection conn = null;
         try {
             conn = Azconnection.getConnection();
@@ -68,9 +64,6 @@ public class MemberTechspecService {
 
     
     public void removeTechspec(Long memberId, Long techspecId) {
-        if (techspecId == null || techspecId <= 0) {
-            throw new TechspecInvalidException("유효하지 않은 스택 ID입니다.");
-        }
 
         if (!memberTechspecRepository.deleteMemberTechspec(memberId, techspecId)) {
             throw new TechspecNotFoundException("삭제할 스택이 존재하지 않습니다.");

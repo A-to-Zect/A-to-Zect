@@ -3,7 +3,6 @@ package knu.atoz.techspec.project;
 import knu.atoz.techspec.Techspec;
 import knu.atoz.techspec.TechspecRepository;
 import knu.atoz.techspec.exception.TechspecAlreadyExistsException;
-import knu.atoz.techspec.exception.TechspecInvalidException;
 import knu.atoz.techspec.exception.TechspecNotFoundException;
 import knu.atoz.utils.Azconnection;
 import lombok.RequiredArgsConstructor;
@@ -27,10 +26,6 @@ public class ProjectTechspecService {
 
     
     public void addTechspecToProject(Long projectId, String techName) {
-
-        if (techName == null || techName.isBlank()) {
-            throw new TechspecInvalidException("스택 이름은 비어 있을 수 없습니다.");
-        }
 
         Connection conn = null;
         try {

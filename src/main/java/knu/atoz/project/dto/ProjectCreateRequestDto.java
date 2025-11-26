@@ -1,9 +1,6 @@
 package knu.atoz.project.dto;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +28,7 @@ public class ProjectCreateRequestDto {
     @Max(value = 20, message = "최대 20명까지만 가능합니다.")
     private Integer maxCount;
 
+    @NotEmpty(message = "기술 스택은 최소 1개 이상 입력해야 합니다.")
     private Set<String> techSpecs;
 
     private Map<Long, String> mbtiMap;

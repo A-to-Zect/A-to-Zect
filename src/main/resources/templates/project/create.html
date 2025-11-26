@@ -67,6 +67,8 @@
             필요한 기술 스택을 입력하고 <strong>엔터(Enter)</strong>키를 누르거나 <strong>추가</strong> 버튼을 클릭하세요.
         </p>
 
+        <div class="field-error-msg" th:errors="*{techSpecs}">기술 스택 에러</div>
+
         <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
             <div class="input-group">
                 <input type="text" id="techInput" placeholder="예: Java, React, Figma" style="margin: 0; flex-grow: 1;">
