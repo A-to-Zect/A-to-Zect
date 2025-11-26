@@ -1,0 +1,44 @@
+name: Direct Deploy to Raspberry Pi
+
+on:
+  push:
+    branches: [ "master" ] # main 브랜치에 푸시될 때만 실행
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.SSH_PORT }}
+          # 타임아웃을 넉넉하게 줍니다 (빌드 시간이 길어질 수 있음)
+          timeout: 10m
+          script: |
+            cd ~/A-to-Zect
+            
+            git pull origin master
+            
+            # 3. .env 파일 생성 (GitHub Secrets 값을 라즈베리파이 로컬 .env 파일로 덮어쓰기)
+            # 이렇게 하면 docker-compose.yml이 이 파일의 변수들을 읽어서 실행합니다.
+            echo "APP_PORT=${{ secrets.APP_PORT }}" > .env
+            echo "DB_URL=${{ secrets.DB_URL }}" >> .env
+            echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+            echo "DB_PWD=${{ secrets.DB_PWD }}" >> .env
+            echo "ORACLE_PWD=${{ secrets.ORACLE_PWD }}" >> .env
+            echo "ORACLE_TAG=${{ secrets.ORACLE_TAG }}" >> .env
+            echo "PLATFORM=${{ secrets.PLATFORM }}" >> .env
+            
+            # 4. 기존 컨테이너 종료 및 삭제 (충돌 방지)
+            # (DB 데이터는 volumes로 보존되니 걱정 마세요)
+            docker-compose down
+            
+            # 5. 빌드 및 실행
+            # --build: 코드가 바뀌었으니 이미지를 새로 빌드합니다.
+            docker-compose up -d --build
+            
+            # 6. 빌드 과정에서 생긴 불필요한 이미지(dangling images) 삭제
+            docker image prune -f
