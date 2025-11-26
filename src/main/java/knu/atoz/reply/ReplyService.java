@@ -17,7 +17,6 @@ public class ReplyService {
 
     // 댓글 목록 조회 (작성자 이름 포함)
     public List<ReplyResponseDto> getReplyList(Long postId) {
-        if (postId == null) throw new InvalidReplyException("게시물 ID가 필요합니다.");
         return replyRepository.findAllByPostId(postId);
     }
 
@@ -30,9 +29,6 @@ public class ReplyService {
 
     // 댓글 작성
     public void createReply(Long postId, Long memberId, ReplyRequestDto requestDto) {
-        if (requestDto.getContent() == null || requestDto.getContent().trim().isEmpty()) {
-            throw new InvalidReplyException("댓글 내용을 입력해주세요.");
-        }
         Reply reply = new Reply(postId, memberId, requestDto.getContent());
         replyRepository.save(reply);
     }
@@ -43,9 +39,6 @@ public class ReplyService {
 
         if (!original.getMemberId().equals(memberId)) {
             throw new UnauthorizedReplyAccessException();
-        }
-        if (requestDto.getContent() == null || requestDto.getContent().trim().isEmpty()) {
-            throw new InvalidReplyException("댓글 내용을 입력해주세요.");
         }
 
         Reply updateReply = new Reply(

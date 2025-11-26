@@ -1,13 +1,11 @@
 package knu.atoz.meeting;
 
 import knu.atoz.meeting.dto.MeetingRequestDto;
-import knu.atoz.meeting.exception.InvalidMeetingInputException;
 import knu.atoz.meeting.exception.MeetingAccessException;
 import knu.atoz.meeting.exception.MeetingNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.time.LocalDateTime;
 
 @Service
 public class MeetingService {
@@ -17,23 +15,7 @@ public class MeetingService {
         this.meetingRepository = meetingRepository;
     }
 
-    private void validateMeetingTime(LocalDateTime startTime, LocalDateTime endTime) {
-        if (startTime == null && endTime == null) return;
-        
-        if (startTime == null || endTime == null) {
-            throw new InvalidMeetingInputException("시작 시간과 종료 시간은 함께 비워두거나, 함께 입력해야 합니다.");
-        }
-        
-        if (!endTime.isAfter(startTime)) {
-            throw new InvalidMeetingInputException("종료 시간은 시작 시간보다 이후여야 합니다.");
-        }
-    }
     public void createMeeting(Long projectId, MeetingRequestDto requestDto) {
-        if (requestDto.getTitle().trim().isEmpty()) {
-            throw new InvalidMeetingInputException("회의록 제목은 비워둘 수 없습니다.");
-        }
-        
-        validateMeetingTime(requestDto.getStartTime(), requestDto.getEndTime());
         
         Meeting meeting = new Meeting(
             projectId, 
@@ -59,9 +41,6 @@ public class MeetingService {
     }
 
     public void updateMeeting(Long meetingId, Long projectId, MeetingRequestDto requestDto) {
-        if (requestDto.getTitle().trim().isEmpty()) {
-            throw new InvalidMeetingInputException("회의록 제목은 비워둘 수 없습니다.");
-        }
         
         Meeting targetMeeting = meetingRepository.findById(meetingId);
         if (targetMeeting == null) {
@@ -70,8 +49,6 @@ public class MeetingService {
 
         if (!targetMeeting.getProjectId().equals(projectId))
             throw new MeetingAccessException("해당 회의록은 이 프로젝트에 속하지 않아 수정할 수 없습니다.");
-
-        validateMeetingTime(requestDto.getStartTime(), requestDto.getEndTime());
         
         Meeting meeting = new Meeting(
             meetingId,

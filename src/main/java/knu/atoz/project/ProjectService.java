@@ -5,9 +5,7 @@ import knu.atoz.participant.ParticipantRepository;
 import knu.atoz.project.dto.MyProjectResponseDto;
 import knu.atoz.project.dto.ProjectCreateRequestDto;
 import knu.atoz.project.dto.ProjectUpdateRequestDto;
-import knu.atoz.project.exception.ProjectDescriptionInvalidException;
 import knu.atoz.project.exception.ProjectNotFoundException;
-import knu.atoz.project.exception.ProjectTitleInvalidException;
 import knu.atoz.project.exception.UnauthorizedProjectAccessException;
 import knu.atoz.techspec.Techspec;
 import knu.atoz.techspec.TechspecRepository;
@@ -76,14 +74,6 @@ public class ProjectService {
     }
 
     public Project createProject(ProjectCreateRequestDto requestDto) {
-        if (requestDto.getTitle() == null || requestDto.getTitle().isBlank()) {
-            throw new ProjectTitleInvalidException("프로젝트 제목은 비어 있을 수 없습니다.");
-        }
-
-        if (requestDto.getDescription() == null || requestDto.getDescription().isBlank()) {
-            throw new ProjectDescriptionInvalidException("프로젝트 설명은 비어 있을 수 없습니다.");
-        }
-
         Connection conn = null;
         try {
             conn = Azconnection.getConnection();

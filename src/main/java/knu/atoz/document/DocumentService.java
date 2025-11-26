@@ -4,7 +4,6 @@ import knu.atoz.document.dto.DocumentRequestDto;
 import knu.atoz.document.exception.DocumentAccessException;
 import knu.atoz.document.exception.DocumentFileNotExistException;
 import knu.atoz.document.exception.DocumentNotFoundException;
-import knu.atoz.document.exception.InvalidDocumentInputException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,9 +27,6 @@ public class DocumentService {
 
 
     public void createDocument(Long projectId, DocumentRequestDto dto) {
-        if (dto.getTitle() == null || dto.getTitle().trim().isEmpty()) {
-            throw new InvalidDocumentInputException("문서 제목을 입력해주세요.");
-        }
 
         try {
             String savedPath = saveFile(dto.getFile());
@@ -65,10 +61,6 @@ public class DocumentService {
 
         if (!targetDocument.getProjectId().equals(projectId)) {
             throw new DocumentAccessException("해당 문서는 이 프로젝트에 속하지 않아 수정할 수 없습니다.");
-        }
-
-        if (requestDto.getTitle() == null || requestDto.getTitle().trim().isEmpty()) {
-            throw new InvalidDocumentInputException("제목은 비워둘 수 없습니다.");
         }
 
         try {

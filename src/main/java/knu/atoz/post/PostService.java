@@ -15,7 +15,6 @@ public class PostService {
 
     // 목록 조회
     public List<Post> getPostList(Long projectId) {
-        if (projectId == null) throw new InvalidPostException("프로젝트 ID가 필요합니다.");
         return postRepository.findAllPostsByProjectId(projectId);
     }
 
@@ -28,9 +27,6 @@ public class PostService {
 
     // 생성
     public void createPost(Long projectId, Long memberId, PostRequestDto requestDto) {
-        if (requestDto.getTitle() == null || requestDto.getTitle().trim().isEmpty()) {
-            throw new InvalidPostException("제목을 입력해주세요.");
-        }
         Post post = new Post(projectId, memberId, requestDto.getTitle(), requestDto.getContent());
         postRepository.save(post);
     }
@@ -42,10 +38,6 @@ public class PostService {
 
         if (!original.getMemberId().equals(memberId)) {
             throw new UnauthorizedPostAccessException();
-        }
-
-        if (requestDto.getTitle() == null || requestDto.getTitle().trim().isEmpty()) {
-            throw new InvalidPostException("제목을 입력해주세요.");
         }
 
         // 내용 변경 및 수정 시간 갱신은 엔티티 내부나 여기서 처리
