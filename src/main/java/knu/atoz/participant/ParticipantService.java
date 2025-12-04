@@ -2,9 +2,12 @@ package knu.atoz.participant;
 
 import knu.atoz.member.Member;
 import knu.atoz.participant.dto.ParticipantResponseDto;
+import knu.atoz.participant.exception.ParticipantAlreadyExistsException;
 import knu.atoz.project.Project;
 import knu.atoz.project.ProjectRepository;
 import knu.atoz.project.ProjectService;
+import knu.atoz.project.exception.ProjectNotFoundException;
+import knu.atoz.project.exception.UnauthorizedProjectAccessException;
 import knu.atoz.utils.Azconnection;
 import org.springframework.stereotype.Service;
 
@@ -83,18 +86,18 @@ public class ParticipantService {
             Project project = projectRepository.findByIdWithLock(conn, projectId);
 
             if (project == null) {
-                throw new RuntimeException("존재하지 않는 프로젝트입니다.");
+                throw new ProjectNotFoundException();
             }
 
             if (project.getCurrentCount() >= project.getMaxCount()) {
-                throw new RuntimeException("아쉽지만 모집 인원이 마감되었습니다.");
+                throw new UnauthorizedProjectAccessException("아쉽지만 모집 인원이 마감되었습니다.");
             }
 
-            if (participantRepository.exists(conn, projectId, memberId)) {
-                throw new RuntimeException("이미 신청했거나 참여 중인 프로젝트입니다.");
+            if (participantRepository.existsWithTx(conn, projectId, memberId)) {
+                throw new ParticipantAlreadyExistsException();
             }
 
-            participantRepository.save(conn, projectId, memberId);
+            participantRepository.saveWithTx(conn, projectId, memberId);
 
             conn.commit();
 

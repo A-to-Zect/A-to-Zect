@@ -55,7 +55,7 @@ public class ParticipantRepository {
         }
     }
 
-    public void save(Connection conn, Long projectId, Long memberId) throws SQLException {
+    public void saveWithTx(Connection conn, Long projectId, Long memberId) throws SQLException {
         String sql = "INSERT INTO participant (member_id, project_id, role) Values (?, ?, 'PENDING')";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setLong(1, memberId);
@@ -68,7 +68,7 @@ public class ParticipantRepository {
         }
     }
 
-    public boolean exists(Connection conn, Long projectId, Long memberId) throws SQLException {
+    public boolean existsWithTx(Connection conn, Long projectId, Long memberId) throws SQLException {
         String sql = "SELECT 1 FROM participant WHERE project_id = ? AND member_id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setLong(1, projectId);
