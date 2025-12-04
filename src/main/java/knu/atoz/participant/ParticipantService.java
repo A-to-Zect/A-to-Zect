@@ -116,10 +116,13 @@ public class ParticipantService {
             conn.setAutoCommit(false);
 
             Project project = projectRepository.findByIdWithLock(conn, projectId);
-            if (project == null) throw new RuntimeException("프로젝트 없음");
+            
+            if (project == null) {
+                throw new ProjectNotFoundException();
+            }
 
             if (project.getCurrentCount() >= project.getMaxCount()) {
-                throw new RuntimeException("모집 인원이 마감되었습니다.");
+                throw new UnauthorizedProjectAccessException("모집 인원이 마감되었습니다.");
             }
 
             participantRepository.updateRole(conn, projectId, targetMemberId, "MEMBER");
@@ -127,7 +130,6 @@ public class ParticipantService {
             projectRepository.incrementCurrentCount(conn, projectId);
 
             conn.commit();
-
         } catch (Exception e) {
             try { if (conn != null) conn.rollback(); } catch (SQLException ex) {}
             throw new RuntimeException("승인 처리 실패: " + e.getMessage());
@@ -144,11 +146,11 @@ public class ParticipantService {
 
             boolean isLeader = participantRepository.isLeader(projectId, requesterId);
             if (!isLeader) {
-                throw new RuntimeException("멤버 추방 권한이 없습니다. (리더만 가능)");
+                throw new UnauthorizedProjectAccessException("멤버 추방 권한이 없습니다. (리더만 가능)");
             }
 
             if (targetMemberId.equals(requesterId)) {
-                throw new RuntimeException("자기 자신을 추방할 수 없습니다.");
+                throw new UnauthorizedProjectAccessException("자기 자신을 추방할 수 없습니다.");
             }
 
             participantRepository.delete(conn, projectId, targetMemberId);
@@ -156,7 +158,6 @@ public class ParticipantService {
             projectRepository.decrementCurrentCount(conn, projectId);
 
             conn.commit();
-
         } catch (Exception e) {
             try { if (conn != null) conn.rollback(); } catch (SQLException ex) {}
             throw new RuntimeException("멤버 추방 실패: " + e.getMessage());
